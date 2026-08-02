@@ -7,6 +7,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Optional
 
 from .models import Run           #For now using simple storage
+from .storage import Storage
 
 def get_model_name(model: Any) -> str:
  
@@ -84,7 +85,7 @@ def track_run(func: Callable) -> Callable:
             timestamp=datetime.now(),
             model_name=model_name,
             params=params,
-            metrics={},  # We'll add metrics later
+            metrics={}, 
             dataset_hash=dataset_hash,
             dataset_shape=X_test.shape if X_test is not None else (0, 0),
             training_time=training_time
@@ -102,7 +103,15 @@ def track_run(func: Callable) -> Callable:
         print()
         
         
-        print("Storage: SQLite integration in progress") #learning 
+        try:
+            storage = Storage()
+            if storage.save_run(run):
+                print(f"Saved to database: {storage.db_path}")
+                print(f"Total runs in database: {storage.get_run_count()}")
+            else:
+                print("Warning: Could not save to database")
+        except Exception as e:
+            print(f"Warning: Database error: {e}")
         
         return result
     
