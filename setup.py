@@ -1,3 +1,6 @@
+"""
+Setup configuration for experiment-tracker package.
+"""
 
 from setuptools import setup, find_packages
 
@@ -15,6 +18,12 @@ setup(
         "click>=8.0.0",
         "joblib>=1.3.0",
         "python-dotenv>=1.0.0",
+        "tabulate>=0.9.0",  
     ],
     python_requires=">=3.9",
+    entry_points={
+        "console_scripts": [
+            "tracker=experiment_tracker.cli:cli",
+        ],
+    },
 )
