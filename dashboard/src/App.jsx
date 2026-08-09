@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
+} from 'recharts';
 import './App.css';
 
 function App() {
@@ -8,11 +12,14 @@ function App() {
   const [error, setError] = useState(null);
   const [selectedRun, setSelectedRun] = useState(null);
 
+  // Colors for charts
+  const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/runs');
+        const response = await axios.get('http://127.0.0.1:5000/api/runs');
         setRuns(response.data.data);
         setLoading(false);
       } catch (err) {
@@ -24,6 +31,25 @@ function App() {
     
     fetchData();
   }, []);
+
+  // Prepare data for charts
+  const chartData = runs.map(run => ({
+    name: run.run_id.slice(-6),  // Last 6 chars of run ID
+    time: parseFloat(run.training_time.toFixed(3)),
+    model: run.model_name,
+    samples: run.dataset_shape[0]
+  }));
+
+  // Count models
+  const modelCounts = runs.reduce((acc, run) => {
+    acc[run.model_name] = (acc[run.model_name] || 0) + 1;
+    return acc;
+  }, {});
+
+  const pieData = Object.entries(modelCounts).map(([name, value]) => ({
+    name,
+    value
+  }));
 
   if (loading) {
     return (
@@ -51,6 +77,67 @@ function App() {
         <p>Total experiments: {runs.length}</p>
       </header>
 
+      {/* Charts Section */}
+      <div className="charts-section">
+        <h2>📊 Experiment Analytics</h2>
+        <div className="charts-grid">
+          {/* Bar Chart: Training Times */}
+          <div className="chart-card">
+            <h3>⏱️ Training Times</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis label={{ value: 'Time (s)', angle: -90, position: 'insideLeft' }} />
+                <Tooltip />
+                <Bar dataKey="time" fill="#667eea" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Pie Chart: Model Distribution */}
+          {pieData.length > 0 && (
+            <div className="chart-card">
+              <h3>🤖 Model Distribution</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Line Chart: Training Time Trend */}
+          <div className="chart-card">
+            <h3>📈 Training Time Trend</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis label={{ value: 'Time (s)', angle: -90, position: 'insideLeft' }} />
+                <Tooltip />
+                <Line type="monotone" dataKey="time" stroke="#764ba2" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard: Table + Details */}
       <div className="dashboard">
         {/* Left: Table */}
         <div className="table-container">
