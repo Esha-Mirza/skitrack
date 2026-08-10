@@ -83,3 +83,9 @@ htmlcov/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+
+*.csv
+*.db
+*.sqlite
+*.sqlite3
