@@ -16,15 +16,7 @@ import ModelDistributionChart from './components/charts/ModelDistributionChart';
 import ScatterChart from './components/charts/ScatterChart';
 import DatasetSizeChart from './components/charts/DatasetSizeChart';
 import RadarChartComponent from './components/charts/RadarChart';
-
-// Comparison Components (files directly in components folder)
 import ComparisonPage from './components/ComparisonPage';
-import ComparisonSelector from './components/ComparisonSelector';
-import ComparisonView from './components/ComparisonView';
-
-// Export Components
-import ExportButton from './components/ExportButton';
-import ReportGenerator from './components/ReportGenerator';
 
 // Table Components
 import ExperimentsTable from './components/tables/ExperimentsTable';

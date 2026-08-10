@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GitCompare } from 'lucide-react';
 import ComparisonSelector from './ComparisonSelector';
 import ComparisonView from './ComparisonView';
-import ComparisonChart from '../charts/ComparisonChart';
+import ComparisonChart from "./charts/ComparisonChart";
 
 function ComparisonPage({ runs }) {
   const [selectedIds, setSelectedIds] = useState([null, null]);
