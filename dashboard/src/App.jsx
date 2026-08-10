@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import ComparisonPage from './components/ComparisonPage';
+import ExportButton from './components/ExportButton';
 import './App.css';
 
 function App() {
@@ -218,6 +219,10 @@ function App() {
                     {Object.keys(selectedRun.params).length > 10 && (
                       <div className="param-more">... and {Object.keys(selectedRun.params).length - 10} more</div>
                     )}
+                  </div>
+                  {/* Export Button */}
+                  <div className="run-detail-actions">
+                    <ExportButton run={selectedRun} />
                   </div>
                 </div>
               ) : (
