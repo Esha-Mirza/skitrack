@@ -1,14 +1,16 @@
 import React from 'react';
 import { downloadHTMLReport } from './ReportGenerator';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 function ExportButton({ run, variant = 'primary' }) {
+  const { isDark } = useDarkMode();
   const [exporting, setExporting] = React.useState(false);
   const [showSuccess, setShowSuccess] = React.useState(false);
 
   const handleExport = () => {
     setExporting(true);
     try {
-      const success = downloadHTMLReport(run);
+      const success = downloadHTMLReport(run, isDark);
       if (success) {
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);

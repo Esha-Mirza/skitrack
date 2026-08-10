@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
 } from 'recharts';
 
-const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+const COLORS = ['#e01e2b', '#ff5b63', '#ffb3b6', '#8f0d18', '#ff8a8f', '#c81124'];
 
 function ModelDistributionChart({ data }) {
   const modelCounts = data.reduce((acc, run) => {
@@ -28,24 +28,33 @@ function ModelDistributionChart({ data }) {
   return (
     <div className="chart-card">
       <h3>Model Distribution</h3>
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
+      <p className="chart-subtitle">Share of runs by model type</p>
+      <ResponsiveContainer width="100%" height={260}>
+        <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
           <Pie
             data={chartData}
-            cx="50%"
+            cx="38%"
             cy="50%"
             labelLine={false}
-            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-            outerRadius={90}
+            outerRadius={80}
+            innerRadius={48}
+            paddingAngle={2}
             fill="#8884d8"
             dataKey="value"
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="var(--bg-card)" strokeWidth={2} />
             ))}
           </Pie>
-          <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }} />
-          <Legend />
+          <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }} labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }} itemStyle={{ color: 'var(--text-secondary)' }} />
+          <Legend
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: '20px' }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>

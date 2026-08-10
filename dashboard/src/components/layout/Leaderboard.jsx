@@ -1,0 +1,63 @@
+import React from 'react';
+import { Zap, Trophy, Layers3, Eye } from 'lucide-react';
+import { getFastestRun, getBestAccuracyRun, getMostParamsRun, simulatedAccuracy } from '../../utils/metrics';
+
+function Leaderboard({ runs, onViewRun }) {
+  if (!runs.length) return null;
+
+  const fastest = getFastestRun(runs);
+  const bestAccuracy = getBestAccuracyRun(runs);
+  const mostParams = getMostParamsRun(runs);
+
+  const cards = [
+    {
+      id: 'fastest',
+      icon: Zap,
+      label: 'Fastest Run',
+      run: fastest,
+      metric: `${fastest.training_time.toFixed(3)}s`,
+      color: '#e01e2b',
+    },
+    {
+      id: 'accuracy',
+      icon: Trophy,
+      label: 'Best Accuracy (simulated)',
+      run: bestAccuracy,
+      metric: `${simulatedAccuracy(bestAccuracy)}%`,
+      color: '#ff5b63',
+    },
+    {
+      id: 'params',
+      icon: Layers3,
+      label: 'Most Parameters',
+      run: mostParams,
+      metric: `${Object.keys(mostParams.params).length} params`,
+      color: '#a3121f',
+    },
+  ];
+
+  return (
+    <div className="leaderboard-grid">
+      {cards.map((card, index) => {
+        const Icon = card.icon;
+        return (
+          <div key={card.id} className="leaderboard-card" style={{ animationDelay: `${index * 0.05}s` }}>
+            <div className="leaderboard-card-icon" style={{ background: `${card.color}20`, color: card.color }}>
+              <Icon size={18} />
+            </div>
+            <div className="leaderboard-card-body">
+              <span className="leaderboard-label">{card.label}</span>
+              <span className="leaderboard-metric">{card.metric}</span>
+              <span className="leaderboard-run-id">{card.run.run_id} · {card.run.model_name}</span>
+            </div>
+            <button className="leaderboard-view-btn" onClick={() => onViewRun(card.run)} title="View run">
+              <Eye size={15} />
+            </button>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default Leaderboard;

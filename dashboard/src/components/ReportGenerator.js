@@ -1,6 +1,38 @@
+// Generates standalone HTML reports that mirror the dashboard's own
+// red/black brand palette — in both light and dark variants, matching
+// whichever theme the dashboard was in when the export was triggered.
 
+function getPalette(isDark) {
+  return isDark
+    ? {
+        bg: '#0a0708',
+        card: '#171112',
+        cardAlt: '#221718',
+        border: '#2a2224',
+        text: '#fdf5f5',
+        textSecondary: '#b9a5a7',
+        textMuted: '#6e5a5c',
+        accent: '#ff3b47',
+        accentGradient: 'linear-gradient(135deg, #ff5b63 0%, #e01e2b 55%, #6e0e15 100%)',
+        shadow: 'rgba(0, 0, 0, 0.5)',
+      }
+    : {
+        bg: '#f6f3f4',
+        card: '#ffffff',
+        cardAlt: '#fdf1f2',
+        border: '#f0e3e5',
+        text: '#1a1418',
+        textSecondary: '#6b5a5e',
+        textMuted: '#ad9ca0',
+        accent: '#e01e2b',
+        accentGradient: 'linear-gradient(135deg, #ff4d4d 0%, #e01e2b 60%, #a3121f 100%)',
+        shadow: 'rgba(224, 30, 43, 0.1)',
+      };
+}
 
-export function generateHTMLReport(run) {
+export function generateHTMLReport(run, isDark = false) {
+  const c = getPalette(isDark);
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,24 +48,25 @@ export function generateHTMLReport(run) {
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #f0f2f5;
+      background: ${c.bg};
       padding: 40px 20px;
-      color: #1a1a2e;
+      color: ${c.text};
       line-height: 1.6;
     }
     
     .container {
       max-width: 1100px;
       margin: 0 auto;
-      background: #ffffff;
+      background: ${c.card};
       border-radius: 16px;
       padding: 48px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 8px 30px ${c.shadow};
+      border: 1px solid ${c.border};
     }
     
     /* Header */
     .report-header {
-      border-bottom: 3px solid #667eea;
+      border-bottom: 3px solid ${c.accent};
       padding-bottom: 20px;
       margin-bottom: 32px;
     }
@@ -41,18 +74,18 @@ export function generateHTMLReport(run) {
     .report-header h1 {
       font-size: 32px;
       font-weight: 700;
-      color: #1a1a2e;
+      color: ${c.text};
       margin-bottom: 4px;
     }
     
     .report-header .subtitle {
-      color: #718096;
+      color: ${c.textMuted};
       font-size: 14px;
     }
     
     .report-header .badge {
       display: inline-block;
-      background: #667eea;
+      background: ${c.accentGradient};
       color: white;
       padding: 4px 16px;
       border-radius: 20px;
@@ -69,10 +102,10 @@ export function generateHTMLReport(run) {
     .section h2 {
       font-size: 20px;
       font-weight: 600;
-      color: #2d3748;
+      color: ${c.text};
       margin-bottom: 16px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid ${c.border};
     }
     
     /* Grid */
@@ -92,19 +125,19 @@ export function generateHTMLReport(run) {
       display: flex;
       justify-content: space-between;
       padding: 10px 16px;
-      background: #f7fafc;
+      background: ${c.cardAlt};
       border-radius: 8px;
-      border-left: 4px solid #667eea;
+      border-left: 4px solid ${c.accent};
     }
     
     .info-item .label {
-      color: #4a5568;
+      color: ${c.textSecondary};
       font-weight: 500;
       font-size: 14px;
     }
     
     .info-item .value {
-      color: #1a1a2e;
+      color: ${c.text};
       font-weight: 600;
       font-size: 14px;
     }
@@ -125,24 +158,24 @@ export function generateHTMLReport(run) {
       display: flex;
       justify-content: space-between;
       padding: 6px 12px;
-      border-bottom: 1px solid #f0f0f0;
+      border-bottom: 1px solid ${c.border};
       font-size: 14px;
     }
     
     .param-item .param-key {
-      color: #4a5568;
+      color: ${c.textSecondary};
       font-weight: 500;
     }
     
     .param-item .param-value {
-      color: #1a1a2e;
+      color: ${c.text};
       font-family: 'Courier New', monospace;
       font-size: 13px;
     }
     
     /* Metrics */
     .metric-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: ${c.accentGradient};
       color: white;
       padding: 20px;
       border-radius: 12px;
@@ -164,17 +197,17 @@ export function generateHTMLReport(run) {
     .report-footer {
       margin-top: 40px;
       padding-top: 20px;
-      border-top: 2px solid #e2e8f0;
+      border-top: 2px solid ${c.border};
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: #a0aec0;
+      color: ${c.textMuted};
       font-size: 13px;
     }
     
     .report-footer .footer-brand {
       font-weight: 600;
-      color: #667eea;
+      color: ${c.accent};
     }
     
     /* Responsive */
@@ -210,12 +243,15 @@ export function generateHTMLReport(run) {
     @media print {
       body {
         background: white;
+        color: #1a1418;
         padding: 20px;
       }
       
       .container {
         box-shadow: none;
         padding: 20px;
+        background: white;
+        border: none;
       }
     }
   </style>
@@ -307,9 +343,9 @@ export function generateHTMLReport(run) {
 /**
  * Download HTML report for a single run
  */
-export function downloadHTMLReport(run) {
+export function downloadHTMLReport(run, isDark = false) {
   try {
-    const html = generateHTMLReport(run);
+    const html = generateHTMLReport(run, isDark);
     const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -329,7 +365,9 @@ export function downloadHTMLReport(run) {
 /**
  * Generate a summary HTML report for ALL runs
  */
-export function generateSummaryReport(runs) {
+export function generateSummaryReport(runs, isDark = false) {
+  const c = getPalette(isDark);
+
   // Count models
   const modelCounts = runs.reduce((acc, run) => {
     acc[run.model_name] = (acc[run.model_name] || 0) + 1;
@@ -349,20 +387,29 @@ export function generateSummaryReport(runs) {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
+      background: ${c.bg};
       padding: 40px 20px;
-      color: #1a1a2e;
+      color: ${c.text};
     }
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
+      background: ${c.card};
       border-radius: 16px;
       padding: 48px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      box-shadow: 0 8px 30px ${c.shadow};
+      border: 1px solid ${c.border};
     }
-    h1 { font-size: 32px; margin-bottom: 4px; }
-    .subtitle { color: #718096; margin-bottom: 24px; }
+    h1 { font-size: 32px; margin-bottom: 4px; color: ${c.text}; }
+    h2 {
+      font-size: 20px;
+      font-weight: 600;
+      color: ${c.text};
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid ${c.border};
+    }
+    .subtitle { color: ${c.textMuted}; margin-bottom: 24px; }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -370,18 +417,19 @@ export function generateSummaryReport(runs) {
       margin-bottom: 32px;
     }
     .stat-card {
-      background: #f7fafc;
+      background: ${c.cardAlt};
       padding: 20px;
       border-radius: 12px;
       text-align: center;
+      border: 1px solid ${c.border};
     }
     .stat-card .stat-value {
       font-size: 28px;
       font-weight: 700;
-      color: #667eea;
+      color: ${c.accent};
     }
     .stat-card .stat-label {
-      color: #4a5568;
+      color: ${c.textSecondary};
       font-size: 14px;
       margin-top: 4px;
     }
@@ -393,26 +441,35 @@ export function generateSummaryReport(runs) {
     th {
       text-align: left;
       padding: 12px;
-      background: #f7fafc;
+      background: ${c.cardAlt};
       font-weight: 600;
-      color: #4a5568;
-      border-bottom: 2px solid #e2e8f0;
+      color: ${c.textSecondary};
+      border-bottom: 2px solid ${c.border};
     }
     td {
       padding: 10px 12px;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid ${c.border};
+      color: ${c.text};
+    }
+    code {
+      font-family: 'Courier New', monospace;
+      color: ${c.text};
     }
     .footer {
       margin-top: 32px;
       padding-top: 16px;
-      border-top: 2px solid #e2e8f0;
+      border-top: 2px solid ${c.border};
       text-align: center;
-      color: #a0aec0;
+      color: ${c.textMuted};
       font-size: 13px;
     }
     @media (max-width: 768px) {
       .container { padding: 24px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media print {
+      body { background: white; color: #1a1418; }
+      .container { box-shadow: none; background: white; border: none; }
     }
   </style>
 </head>
@@ -435,7 +492,7 @@ export function generateSummaryReport(runs) {
         <div class="stat-label">Avg Training Time</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">${runs.reduce((sum, r) => sum + Object.keys(r.params).length, 0) / runs.length || 0}</div>
+        <div class="stat-value">${(runs.reduce((sum, r) => sum + Object.keys(r.params).length, 0) / runs.length || 0).toFixed(1)}</div>
         <div class="stat-label">Avg Parameters</div>
       </div>
     </div>
@@ -479,9 +536,9 @@ export function generateSummaryReport(runs) {
 /**
  * Download summary HTML report
  */
-export function downloadSummaryReport(runs) {
+export function downloadSummaryReport(runs, isDark = false) {
   try {
-    const html = generateSummaryReport(runs);
+    const html = generateSummaryReport(runs, isDark);
     const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');

@@ -7,6 +7,7 @@ import { useDarkMode } from './hooks/useDarkMode';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import StatsCards from './components/layout/StatsCards';
+import Leaderboard from './components/layout/Leaderboard';
 
 // Chart Components
 import TrainingTimeChart from './components/charts/TrainingTimeChart';
@@ -15,16 +16,23 @@ import ParameterChart from './components/charts/ParameterChart';
 import ModelDistributionChart from './components/charts/ModelDistributionChart';
 import ScatterChart from './components/charts/ScatterChart';
 import DatasetSizeChart from './components/charts/DatasetSizeChart';
-import RadarChartComponent from './components/charts/RadarChart';
-import ComparisonPage from './components/ComparisonPage';
+import TrainingTrendChart from './components/charts/TrainingTrendChart';
+import ParameterImpactChart from './components/charts/ParameterImpactChart';
+import ModelBreakdownChart from './components/charts/ModelBreakdownChart';
 
 // Table Components
 import ExperimentsTable from './components/tables/ExperimentsTable';
 
+// Feature Pages
+import ComparisonPage from './components/ComparisonPage';
+import ExportPage from './components/ExportPage';
+import SettingsPage from './components/SettingsPage';
+import DataConsistencyPanel from './components/DataConsistencyPanel';
+
 // UI Components
 import LoadingSkeleton from './components/ui/LoadingSkeleton';
 import ToastNotification from './components/ui/ToastNotification';
-import SettingsModal from './components/ui/SettingsModal';
+import RunDetailModal from './components/ui/RunDetailModal';
 
 // Pages
 import HelpPage from './components/Help/HelpPage';
@@ -40,14 +48,6 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
-  const [showSettings, setShowSettings] = useState(false);
-  const [chartColors, setChartColors] = useState({
-    training: '#667eea',
-    accuracy: '#48bb78',
-    parameters: '#f6ad55',
-    distribution: '#764ba2',
-    scatter: '#4facfe'
-  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,24 +61,16 @@ function AppContent() {
         console.error('Error:', err);
       }
     };
-    
+
     fetchData();
   }, []);
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
   };
 
-  const handleViewRun = (run) => {
-    setSelectedRun(run);
-    setCurrentView('experiments');
-    showToast(`Viewing experiment: ${run.run_id}`, 'success');
-  };
-
-  const handleColorChange = (chartName, color) => {
-    setChartColors(prev => ({ ...prev, [chartName]: color }));
-    showToast(`Updated color for ${chartName}`, 'success');
+  const handleViewChange = (view) => {
+    setCurrentView(view);
   };
 
   if (loading) {
@@ -101,85 +93,68 @@ function AppContent() {
         return (
           <>
             <StatsCards runs={runs} />
+            <Leaderboard runs={runs} onViewRun={setSelectedRun} />
             <div className="charts-grid">
-              <TrainingTimeChart data={runs} color={chartColors.training} />
-              <AccuracyChart data={runs} color={chartColors.accuracy} />
-              <ParameterChart data={runs} color={chartColors.parameters} />
-              <ModelDistributionChart data={runs} color={chartColors.distribution} />
-              <ScatterChart data={runs} color={chartColors.scatter} />
-              <DatasetSizeChart data={runs} color={chartColors.training} />
-              <RadarChartComponent data={runs} />
+              <TrainingTimeChart data={runs} />
+              <AccuracyChart data={runs} />
+              <ParameterChart data={runs} />
+              <ModelDistributionChart data={runs} />
+              <ScatterChart data={runs} />
+              <DatasetSizeChart data={runs} />
             </div>
-            <ExperimentsTable 
-              runs={runs} 
-              onViewRun={handleViewRun}
+            <ExperimentsTable
+              runs={runs}
+              onViewRun={setSelectedRun}
               searchQuery={searchQuery}
-              selectedRun={selectedRun}
             />
           </>
         );
-      
+
       case 'experiments':
         return (
-          <ExperimentsTable 
-            runs={runs} 
-            onViewRun={handleViewRun}
+          <ExperimentsTable
+            runs={runs}
+            onViewRun={setSelectedRun}
             searchQuery={searchQuery}
-            selectedRun={selectedRun}
           />
         );
-      
+
       case 'analytics':
         return (
           <>
             <StatsCards runs={runs} />
             <div className="charts-grid">
-              <TrainingTimeChart data={runs} color={chartColors.training} />
-              <AccuracyChart data={runs} color={chartColors.accuracy} />
-              <ParameterChart data={runs} color={chartColors.parameters} />
-              <ModelDistributionChart data={runs} color={chartColors.distribution} />
-              <ScatterChart data={runs} color={chartColors.scatter} />
-              <DatasetSizeChart data={runs} color={chartColors.training} />
-              <RadarChartComponent data={runs} />
+              <TrainingTimeChart data={runs} />
+              <AccuracyChart data={runs} />
+              <ParameterChart data={runs} />
+              <ModelDistributionChart data={runs} />
+              <ScatterChart data={runs} />
+              <DatasetSizeChart data={runs} />
+              <TrainingTrendChart data={runs} />
+              <ParameterImpactChart data={runs} />
+              <ModelBreakdownChart data={runs} />
             </div>
+            <DataConsistencyPanel runs={runs} />
           </>
         );
-      
+
       case 'compare':
         return <ComparisonPage runs={runs} />;
-      
+
       case 'export':
         return (
-          <div className="export-page">
-            <h1>Export</h1>
-            <p>Export your experiment data</p>
-            <div className="export-options">
-              <button onClick={() => showToast('Exporting to CSV...', 'success')}>
-                Export CSV
-              </button>
-              <button onClick={() => showToast('Exporting to JSON...', 'success')}>
-                Export JSON
-              </button>
-              <button onClick={() => showToast('Exporting to HTML...', 'success')}>
-                Export HTML
-              </button>
-            </div>
-          </div>
-        );
-      
-      case 'help':
-        return <HelpPage />;
-      
-      case 'settings':
-        return (
-          <SettingsModal 
-            isOpen={true}
-            onClose={() => setCurrentView('dashboard')}
-            colors={chartColors}
-            onColorChange={handleColorChange}
+          <ExportPage
+            runs={runs}
+            onExported={() => showToast('Report downloaded successfully')}
           />
         );
-      
+
+      case 'settings':
+        return <SettingsPage />;
+
+      case 'help':
+        return <HelpPage />;
+
       default:
         return <StatsCards runs={runs} />;
     }
@@ -187,16 +162,24 @@ function AppContent() {
 
   return (
     <div className={`app ${isDark ? 'dark' : 'light'}`}>
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+      <Sidebar currentView={currentView} onViewChange={handleViewChange} />
       <div className="main-content">
-        <Header onSearch={setSearchQuery} />
+        <Header onSearch={setSearchQuery} currentView={currentView} />
         <main className="content">
-          {renderContent()}
+          <div key={currentView} className="page-fade">
+            {renderContent()}
+          </div>
         </main>
       </div>
+      {selectedRun && (
+        <RunDetailModal
+          run={selectedRun}
+          onClose={() => setSelectedRun(null)}
+        />
+      )}
       {toast && (
-        <ToastNotification 
-          message={toast.message} 
+        <ToastNotification
+          message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
         />
