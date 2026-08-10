@@ -153,6 +153,7 @@ body {
   padding: 12px;
   border-bottom: 1px solid #e2e8f0;
   font-size: 14px;
+  color: #1a1a2e;
 }
 
 .runs-table tbody tr:hover {
@@ -249,7 +250,7 @@ body {
 }
 
 .param-value {
-  color: #2d3748;
+  color: #1a1a2e;
   font-family: 'Courier New', monospace;
   font-size: 12px;
 }
@@ -271,18 +272,24 @@ body {
   font-size: 16px;
 }
 
-/* Comparison Page */
+/* ============================================ */
+/* COMPARISON PAGE - FIXED TEXT COLORS */
+/* ============================================ */
+
 .comparison-page {
   padding: 0;
 }
 
 .comparison-page h2 {
-  margin-bottom: 8px;
   color: #1a1a2e;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
 .comparison-page .description {
-  color: #718096;
+  color: #4a5568;
+  font-size: 16px;
   margin-bottom: 24px;
 }
 
@@ -296,9 +303,10 @@ body {
 }
 
 .comparison-selector h3 {
-  margin-bottom: 16px;
   color: #2d3748;
   font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
 }
 
 .selector-grid {
@@ -313,12 +321,18 @@ body {
   border-radius: 8px;
   font-size: 14px;
   background: white;
+  color: #1a1a2e;
   cursor: pointer;
 }
 
 .selector-grid select:focus {
   outline: none;
   border-color: #667eea;
+}
+
+.selector-grid select option {
+  color: #1a1a2e;
+  background: white;
 }
 
 /* Comparison View */
@@ -332,7 +346,11 @@ body {
 .comparison-empty {
   padding: 60px 20px;
   text-align: center;
+}
+
+.comparison-empty p {
   color: #a0aec0;
+  font-size: 16px;
 }
 
 .comparison-grid {
@@ -355,13 +373,14 @@ body {
 }
 
 .comparison-header h3 {
-  font-size: 18px;
   color: #2d3748;
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .comparison-header .run-id {
-  font-size: 12px;
-  color: #a0aec0;
+  color: #4a5568;
+  font-size: 13px;
   font-family: monospace;
   margin-top: 4px;
 }
@@ -390,16 +409,18 @@ body {
 
 .detail-label {
   color: #4a5568;
-}
-
-.detail-value {
-  color: #2d3748;
   font-weight: 500;
 }
 
+.detail-value {
+  color: #1a1a2e;
+  font-weight: 600;
+}
+
 .comparison-params h4 {
-  font-size: 14px;
   color: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
   margin-bottom: 8px;
 }
 
@@ -416,8 +437,15 @@ body {
 }
 
 .param-row .param-value {
-  color: #2d3748;
+  color: #1a1a2e;
   font-family: monospace;
+}
+
+.param-row .param-more {
+  color: #a0aec0;
+  font-size: 12px;
+  text-align: center;
+  padding: 4px 0;
 }
 
 /* Differences */
@@ -428,8 +456,10 @@ body {
 }
 
 .comparison-differences h4 {
-  margin-bottom: 12px;
   color: #2d3748;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
 }
 
 .differences-grid {
@@ -456,13 +486,13 @@ body {
 }
 
 .diff-key {
-  font-weight: 500;
   color: #2d3748;
+  font-weight: 500;
 }
 
 .diff-val1, .diff-val2 {
+  color: #1a1a2e;
   font-family: monospace;
-  color: #4a5568;
 }
 
 .diff-arrow {
@@ -471,15 +501,15 @@ body {
 
 .diff-status {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .difference-row.different .diff-status {
-  color: #fc8181;
+  color: #e53e3e;
 }
 
 .difference-row.same .diff-status {
-  color: #68d391;
+  color: #38a169;
 }
 
 /* Loading and error */
@@ -494,6 +524,7 @@ body {
 
 .loading h2, .error h2 {
   margin-bottom: 12px;
+  color: #1a1a2e;
 }
 
 .loading p, .error p {
