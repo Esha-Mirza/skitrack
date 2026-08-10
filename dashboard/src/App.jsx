@@ -15,6 +15,16 @@ import ParameterChart from './components/charts/ParameterChart';
 import ModelDistributionChart from './components/charts/ModelDistributionChart';
 import ScatterChart from './components/charts/ScatterChart';
 import DatasetSizeChart from './components/charts/DatasetSizeChart';
+import RadarChartComponent from './components/charts/RadarChart';
+
+// Comparison Components (files directly in components folder)
+import ComparisonPage from './components/ComparisonPage';
+import ComparisonSelector from './components/ComparisonSelector';
+import ComparisonView from './components/ComparisonView';
+
+// Export Components
+import ExportButton from './components/ExportButton';
+import ReportGenerator from './components/ReportGenerator';
 
 // Table Components
 import ExperimentsTable from './components/tables/ExperimentsTable';
@@ -22,6 +32,7 @@ import ExperimentsTable from './components/tables/ExperimentsTable';
 // UI Components
 import LoadingSkeleton from './components/ui/LoadingSkeleton';
 import ToastNotification from './components/ui/ToastNotification';
+import SettingsModal from './components/ui/SettingsModal';
 
 // Pages
 import HelpPage from './components/Help/HelpPage';
@@ -37,6 +48,14 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [chartColors, setChartColors] = useState({
+    training: '#667eea',
+    accuracy: '#48bb78',
+    parameters: '#f6ad55',
+    distribution: '#764ba2',
+    scatter: '#4facfe'
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +75,18 @@ function AppContent() {
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleViewRun = (run) => {
+    setSelectedRun(run);
+    setCurrentView('experiments');
+    showToast(`Viewing experiment: ${run.run_id}`, 'success');
+  };
+
+  const handleColorChange = (chartName, color) => {
+    setChartColors(prev => ({ ...prev, [chartName]: color }));
+    showToast(`Updated color for ${chartName}`, 'success');
   };
 
   if (loading) {
@@ -79,17 +110,19 @@ function AppContent() {
           <>
             <StatsCards runs={runs} />
             <div className="charts-grid">
-              <TrainingTimeChart data={runs} />
-              <AccuracyChart data={runs} />
-              <ParameterChart data={runs} />
-              <ModelDistributionChart data={runs} />
-              <ScatterChart data={runs} />
-              <DatasetSizeChart data={runs} />
+              <TrainingTimeChart data={runs} color={chartColors.training} />
+              <AccuracyChart data={runs} color={chartColors.accuracy} />
+              <ParameterChart data={runs} color={chartColors.parameters} />
+              <ModelDistributionChart data={runs} color={chartColors.distribution} />
+              <ScatterChart data={runs} color={chartColors.scatter} />
+              <DatasetSizeChart data={runs} color={chartColors.training} />
+              <RadarChartComponent data={runs} />
             </div>
             <ExperimentsTable 
               runs={runs} 
-              onViewRun={setSelectedRun}
+              onViewRun={handleViewRun}
               searchQuery={searchQuery}
+              selectedRun={selectedRun}
             />
           </>
         );
@@ -98,8 +131,9 @@ function AppContent() {
         return (
           <ExperimentsTable 
             runs={runs} 
-            onViewRun={setSelectedRun}
+            onViewRun={handleViewRun}
             searchQuery={searchQuery}
+            selectedRun={selectedRun}
           />
         );
       
@@ -108,18 +142,51 @@ function AppContent() {
           <>
             <StatsCards runs={runs} />
             <div className="charts-grid">
-              <TrainingTimeChart data={runs} />
-              <AccuracyChart data={runs} />
-              <ParameterChart data={runs} />
-              <ModelDistributionChart data={runs} />
-              <ScatterChart data={runs} />
-              <DatasetSizeChart data={runs} />
+              <TrainingTimeChart data={runs} color={chartColors.training} />
+              <AccuracyChart data={runs} color={chartColors.accuracy} />
+              <ParameterChart data={runs} color={chartColors.parameters} />
+              <ModelDistributionChart data={runs} color={chartColors.distribution} />
+              <ScatterChart data={runs} color={chartColors.scatter} />
+              <DatasetSizeChart data={runs} color={chartColors.training} />
+              <RadarChartComponent data={runs} />
             </div>
           </>
         );
       
+      case 'compare':
+        return <ComparisonPage runs={runs} />;
+      
+      case 'export':
+        return (
+          <div className="export-page">
+            <h1>Export</h1>
+            <p>Export your experiment data</p>
+            <div className="export-options">
+              <button onClick={() => showToast('Exporting to CSV...', 'success')}>
+                Export CSV
+              </button>
+              <button onClick={() => showToast('Exporting to JSON...', 'success')}>
+                Export JSON
+              </button>
+              <button onClick={() => showToast('Exporting to HTML...', 'success')}>
+                Export HTML
+              </button>
+            </div>
+          </div>
+        );
+      
       case 'help':
         return <HelpPage />;
+      
+      case 'settings':
+        return (
+          <SettingsModal 
+            isOpen={true}
+            onClose={() => setCurrentView('dashboard')}
+            colors={chartColors}
+            onColorChange={handleColorChange}
+          />
+        );
       
       default:
         return <StatsCards runs={runs} />;

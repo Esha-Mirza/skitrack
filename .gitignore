@@ -89,3 +89,5 @@ dmypy.json
 *.db
 *.sqlite
 *.sqlite3
+
+compomemts/

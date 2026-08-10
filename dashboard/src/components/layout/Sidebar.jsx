@@ -44,7 +44,10 @@ function Sidebar({ currentView, onViewChange }) {
         })}
       </nav>
       <div className="sidebar-footer">
-        <button className="sidebar-item" onClick={() => onViewChange('settings')}>
+        <button 
+          className="sidebar-item" 
+          onClick={() => onViewChange('settings')}
+        >
           <Settings size={20} />
           <span>Settings</span>
         </button>

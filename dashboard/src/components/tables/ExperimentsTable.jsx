@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronUp, ChevronDown, Eye, Filter, ArrowUpDown } from 'lucide-react';
 
-function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
+function ExperimentsTable({ runs, onViewRun, searchQuery = '', selectedRun }) {
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
   const [filterModel, setFilterModel] = useState('');
@@ -50,6 +50,11 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
   const SortIcon = ({ field }) => {
     if (sortField !== field) return <ArrowUpDown size={14} className="sort-icon" />;
     return sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
+  };
+
+  // Check if a run is selected
+  const isSelected = (run) => {
+    return selectedRun && selectedRun.id === run.id;
   };
 
   if (filteredRuns.length === 0) {
@@ -107,7 +112,7 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
           </thead>
           <tbody>
             {sortedRuns.map((run, index) => (
-              <tr key={run.id}>
+              <tr key={run.id} className={isSelected(run) ? 'selected-row' : ''}>
                 <td>{index + 1}</td>
                 <td className="run-id-cell">{run.run_id}</td>
                 <td>

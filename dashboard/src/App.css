@@ -1050,3 +1050,210 @@ body {
     break-inside: avoid;
   }
 }
+
+/* ============================================
+   SETTINGS MODAL
+   ============================================ */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.settings-modal {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-hover);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-title h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-close {
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.settings-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.settings-description {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.color-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+}
+
+.color-option label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.color-option input[type="color"] {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 2px;
+  background: transparent;
+}
+
+.settings-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.settings-apply {
+  padding: 10px 32px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-apply:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   EXPORT PAGE
+   ============================================ */
+.export-page {
+  padding: 20px 0;
+}
+
+.export-page h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.export-page p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.export-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.export-options button {
+  padding: 12px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-options button:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ============================================
+   SELECTED ROW
+   ============================================ */
+.experiments-table tbody tr.selected-row {
+  background: var(--accent-light);
+}
+
+.experiments-table tbody tr.selected-row:hover {
+  background: var(--accent-light);
+}
+
+/* ============================================
+   COMPARISON ICON
+   ============================================ */
+.comparison-header-section {
+  margin-bottom: 24px;
+}
+
+.comparison-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.comparison-icon {
+  color: var(--accent);
+}
+
+.comparison-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.comparison-subtitle {
+  color: var(--text-secondary);
+  font-size: 16px;
+}
