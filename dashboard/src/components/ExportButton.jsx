@@ -1,4 +1,5 @@
 import React from 'react';
+import { Download, CheckCircle2, Loader2 } from 'lucide-react';
 import { downloadHTMLReport } from './ReportGenerator';
 import { useDarkMode } from '../hooks/useDarkMode';
 
@@ -30,11 +31,20 @@ function ExportButton({ run, variant = 'primary' }) {
       disabled={exporting}
     >
       {exporting ? (
-        'Generating...'
+        <>
+          <Loader2 size={14} className="spin-icon" />
+          Generating...
+        </>
       ) : showSuccess ? (
-        '✓ Exported!'
+        <>
+          <CheckCircle2 size={14} />
+          Exported!
+        </>
       ) : (
-        'Export HTML Report'
+        <>
+          <Download size={14} />
+          Export HTML Report
+        </>
       )}
     </button>
   );

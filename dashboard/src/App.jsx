@@ -123,14 +123,16 @@ function AppContent() {
         return (
           <>
             <StatsCards runs={runs} />
-            <div className="charts-grid">
+            <div className="charts-grid charts-grid-featured">
+              <TrainingTrendChart data={runs} />
+            </div>
+            <div className="charts-grid charts-grid-secondary">
               <TrainingTimeChart data={runs} />
               <AccuracyChart data={runs} />
               <ParameterChart data={runs} />
               <ModelDistributionChart data={runs} />
               <ScatterChart data={runs} />
               <DatasetSizeChart data={runs} />
-              <TrainingTrendChart data={runs} />
               <ParameterImpactChart data={runs} />
               <ModelBreakdownChart data={runs} />
             </div>

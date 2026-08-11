@@ -16,8 +16,8 @@
   --bg-card: #ffffff;
   --bg-hover: #fdf1f2;
   --text-primary: #1a1418;
-  --text-secondary: #6b5a5e;
-  --text-muted: #ad9ca0;
+  --text-secondary: #57464a;
+  --text-muted: #7d686c;
   --border-color: #f0e3e5;
   --shadow: 0 4px 6px rgba(220, 38, 38, 0.04);
   --shadow-hover: 0 12px 32px rgba(220, 38, 38, 0.12);
@@ -47,7 +47,7 @@
   --bg-hover: #221718;
   --text-primary: #fdf5f5;
   --text-secondary: #b9a5a7;
-  --text-muted: #6e5a5c;
+  --text-muted: #9c8689;
   --border-color: rgba(255, 255, 255, 0.07);
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
   --shadow-hover: 0 12px 34px rgba(224, 30, 43, 0.18);
@@ -647,6 +647,19 @@ body {
   margin-bottom: 24px;
 }
 
+.charts-grid-featured {
+  grid-template-columns: 1fr;
+  margin-bottom: 20px;
+}
+
+.charts-grid-featured .chart-card {
+  padding: 24px 28px;
+}
+
+.charts-grid-secondary {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .chart-card {
   background: var(--bg-card);
   border-radius: 14px;
@@ -664,6 +677,8 @@ body {
 .charts-grid .chart-card:nth-child(4) { animation-delay: 0.16s; }
 .charts-grid .chart-card:nth-child(5) { animation-delay: 0.2s; }
 .charts-grid .chart-card:nth-child(6) { animation-delay: 0.24s; }
+.charts-grid .chart-card:nth-child(7) { animation-delay: 0.28s; }
+.charts-grid .chart-card:nth-child(8) { animation-delay: 0.32s; }
 
 .chart-card:hover {
   box-shadow: var(--shadow-hover);
@@ -1494,6 +1509,10 @@ button:active {
   white-space: nowrap;
 }
 
+.spin-icon {
+  animation: spin 0.9s linear infinite;
+}
+
 .export-btn.primary {
   background: var(--accent-gradient);
   color: white;
@@ -1652,8 +1671,8 @@ button:active {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 20px 24px;
+  gap: 16px;
+  padding: 24px 26px 22px;
   border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
@@ -1661,10 +1680,12 @@ button:active {
 }
 
 .modal-header h3 {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   color: var(--text-primary);
   font-family: 'Courier New', monospace;
+  margin-top: 10px;
+  letter-spacing: 0.2px;
 }
 
 .modal-close {
@@ -1688,39 +1709,41 @@ button:active {
 }
 
 .modal-body {
-  padding: 20px 24px;
+  padding: 24px 26px 8px;
 }
 
 .modal-body .comparison-stat-pills {
   grid-template-columns: repeat(3, 1fr);
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
 .modal-section-title {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: var(--text-muted);
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .modal-params-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
-  max-height: 200px;
+  gap: 4px 28px;
+  max-height: 320px;
   overflow-y: auto;
   margin-bottom: 20px;
+  padding-right: 14px;
 }
 
 .modal-param-row {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  padding: 6px 0;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--border-color);
-  font-size: 12.5px;
+  font-size: 13px;
 }
 
 .modal-param-row .param-key {
@@ -2121,6 +2144,14 @@ button:active {
 @media (max-width: 1400px) {
   .charts-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid-secondary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid-featured {
+    grid-template-columns: 1fr;
   }
 }
 

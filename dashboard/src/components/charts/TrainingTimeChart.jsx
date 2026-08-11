@@ -65,7 +65,7 @@ function TrainingTimeChart({ data }) {
     <div className="chart-card">
       <div className="chart-header">
         <div className="chart-header-text">
-          <h3>Training Times</h3>
+          <h3>Training Time by Run</h3>
           <p className="chart-subtitle">Seconds per run · lower is faster</p>
         </div>
         <ChartTypeToggle chartType={chartType} onChange={setChartType} />

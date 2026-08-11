@@ -28,9 +28,9 @@ function TrainingTrendChart({ data }) {
 
   return (
     <div className="chart-card">
-      <h3>Training Time Trend</h3>
-      <p className="chart-subtitle">How training time has moved across your runs, in order</p>
-      <ResponsiveContainer width="100%" height={260}>
+      <h3>Training Time Trend (Over Time)</h3>
+      <p className="chart-subtitle">Sorted chronologically · shows if training is getting faster or slower</p>
+      <ResponsiveContainer width="100%" height={320}>
         <LineChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
           <XAxis dataKey="date" stroke="var(--text-muted)" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickLine={false} axisLine={false} />
