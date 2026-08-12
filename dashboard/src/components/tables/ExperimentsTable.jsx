@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { ChevronUp, ChevronDown, Eye, Filter, ArrowUpDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronUp, ChevronDown, Eye, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
   const [sortField, setSortField] = useState('id');
   const [sortDirection, setSortDirection] = useState('asc');
   const [filterModel, setFilterModel] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const models = [...new Set(runs.map(r => r.model_name))];
 
@@ -37,6 +40,15 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
+
+  const totalPages = Math.max(1, Math.ceil(sortedRuns.length / PAGE_SIZE));
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterModel, sortField, sortDirection, runs.length]);
+
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * PAGE_SIZE;
+  const paginatedRuns = sortedRuns.slice(startIndex, startIndex + PAGE_SIZE);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -106,9 +118,9 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
             </tr>
           </thead>
           <tbody>
-            {sortedRuns.map((run, index) => (
+            {paginatedRuns.map((run, index) => (
               <tr key={run.id}>
-                <td>{index + 1}</td>
+                <td>{startIndex + index + 1}</td>
                 <td className="run-id-cell">{run.run_id}</td>
                 <td>
                   <span className="model-badge">{run.model_name}</span>
@@ -130,6 +142,33 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="table-pagination">
+          <span className="pagination-info">
+            Showing {startIndex + 1}–{Math.min(startIndex + PAGE_SIZE, sortedRuns.length)} of {sortedRuns.length}
+          </span>
+          <div className="pagination-controls">
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="pagination-page">Page {safePage} of {totalPages}</span>
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+              aria-label="Next page"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
