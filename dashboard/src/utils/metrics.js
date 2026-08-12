@@ -1,6 +1,3 @@
-// Shared analysis helpers used across charts, leaderboard, and comparison views.
-// Centralizing these keeps numbers (like simulated accuracy) consistent
-// everywhere they're shown, instead of each chart rolling its own random value.
 
 function hashString(str) {
   let hash = 0;
@@ -11,16 +8,29 @@ function hashString(str) {
   return Math.abs(hash);
 }
 
-/**
- * Deterministic "simulated" accuracy for a run, stable across re-renders
- * and across every component that displays it (until a real `accuracy`
- * field exists on tracked runs).
- */
 export function simulatedAccuracy(run) {
   const key = run?.run_id || String(run?.id ?? '');
   const h = hashString(key);
   const frac = (h % 1000) / 1000; // 0 .. 0.999
   return parseFloat((85 + frac * 14.5).toFixed(1));
+}
+
+export function getAccuracyInfo(run) {
+  const metrics = run?.metrics || {};
+
+  if (typeof metrics.accuracy === 'number' && !isNaN(metrics.accuracy)) {
+    return { value: parseFloat((metrics.accuracy * 100).toFixed(1)), isReal: true, label: 'accuracy' };
+  }
+
+  if (typeof metrics.r2_score === 'number' && !isNaN(metrics.r2_score)) {
+    return { value: parseFloat((metrics.r2_score * 100).toFixed(1)), isReal: true, label: 'r2 score' };
+  }
+
+  if (typeof metrics.score === 'number' && !isNaN(metrics.score)) {
+    return { value: parseFloat((metrics.score * 100).toFixed(1)), isReal: true, label: 'score' };
+  }
+
+  return { value: simulatedAccuracy(run), isReal: false, label: 'accuracy (simulated)' };
 }
 
 export function getFastestRun(runs) {
@@ -36,14 +46,9 @@ export function getMostParamsRun(runs) {
 
 export function getBestAccuracyRun(runs) {
   if (!runs.length) return null;
-  return runs.reduce((b, r) => (simulatedAccuracy(r) > simulatedAccuracy(b) ? r : b), runs[0]);
+  return runs.reduce((b, r) => (getAccuracyInfo(r).value > getAccuracyInfo(b).value ? r : b), runs[0]);
 }
 
-/**
- * Finds a parameter key that appears as a numeric value across a decent
- * share of runs, so we can plot it meaningfully. Returns null if nothing
- * qualifies (mixed model types with unrelated hyperparameters, etc).
- */
 export function findSharedNumericParam(runs) {
   const counts = {};
   runs.forEach(run => {

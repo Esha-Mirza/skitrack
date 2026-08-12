@@ -3,16 +3,22 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ZAxis
 } from 'recharts';
-import { simulatedAccuracy } from '../../utils/metrics';
+import { getAccuracyInfo } from '../../utils/metrics';
 
 function ScatterChartComponent({ data }) {
-  const chartData = useMemo(() => data.map(run => ({
-    time: parseFloat(run.training_time.toFixed(3)),
-    accuracy: simulatedAccuracy(run),
-    model: run.model_name,
-    params: Object.keys(run.params).length,
-    name: run.run_id.slice(-6)
-  })), [data]);
+  const chartData = useMemo(() => data.map(run => {
+    const info = getAccuracyInfo(run);
+    return {
+      time: parseFloat(run.training_time.toFixed(3)),
+      accuracy: info.value,
+      isReal: info.isReal,
+      model: run.model_name,
+      params: Object.keys(run.params).length,
+      name: run.run_id.slice(-6)
+    };
+  }), [data]);
+
+  const anySimulated = chartData.some(d => !d.isReal);
 
   if (chartData.length === 0) {
     return (
@@ -26,7 +32,9 @@ function ScatterChartComponent({ data }) {
   return (
     <div className="chart-card">
       <h3>Time vs Accuracy</h3>
-      <p className="chart-subtitle">Training time against simulated accuracy</p>
+      <p className="chart-subtitle">
+        {anySimulated ? 'Training time vs. accuracy (real where captured, simulated otherwise)' : 'Training time against accuracy'}
+      </p>
       <ResponsiveContainer width="100%" height={260}>
         <ScatterChart margin={{ top: 8, right: 12, left: 4, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
@@ -58,6 +66,9 @@ function ScatterChartComponent({ data }) {
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
             labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
             itemStyle={{ color: 'var(--text-secondary)' }}
+            formatter={(value, name, props) =>
+              name === 'Accuracy' ? [`${value}%${props.payload.isReal ? '' : ' (simulated)'}`, name] : [value, name]
+            }
           />
           <Scatter
             name="Experiments"

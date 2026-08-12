@@ -1,11 +1,12 @@
 import time
 import hashlib
 import json
+import uuid
 from datetime import datetime
 from functools import wraps
 from typing import Any, Callable, Dict, Optional
 
-from .models import Run           #For now using simple storage
+from .models import Run          
 from .storage import Storage
 
 def get_model_name(model: Any) -> str:
@@ -26,9 +27,9 @@ def get_dataset_hash(X, y=None) -> str:
     import pandas as pd
     
 
-    if hasattr(X, 'values'):  #pandas DataFrame
+    if hasattr(X, 'values'): 
         data_str = str(X.values.tolist())
-    else:  #numpy array
+    else:  
         data_str = str(X.tolist())
     
     if y is not None:
@@ -42,12 +43,7 @@ def get_dataset_hash(X, y=None) -> str:
 
 
 def compute_default_metrics(model: Any, X_test, y_test) -> Dict[str, float]:
-    """
-    Best-effort metric computation when the tracked function doesn't supply
-    an explicit metrics dict. Uses the model's own .score() so it works for
-    any scikit-learn estimator, and labels the result sensibly based on
-    whether the model is a classifier or regressor.
-    """
+
     if X_test is None or y_test is None or not hasattr(model, 'score'):
         return {}
 
@@ -81,24 +77,17 @@ def track_run(func: Callable) -> Callable:
         end_time = time.time()
         training_time = end_time - start_time
         
-
-        #Extract model from result return (model, X_test, y_test, [metrics]) or similar
         if isinstance(result, tuple) and len(result) >= 1:
             model = result[0]
         else:
             model = result
-        
-        #Extract model information
+
         model_name = get_model_name(model)
         params = get_model_params(model)
-        
-        #Extract dataset if available
+
         X_test = result[1] if isinstance(result, tuple) and len(result) >= 2 else None
         y_test = result[2] if isinstance(result, tuple) and len(result) >= 3 else None
 
-        #Extract explicit metrics if the function returned a 4th item, e.g.
-        #   return model, X_test, y_test, {"accuracy": 0.94, "f1": 0.91}
-        #Otherwise fall back to auto-computing a metric via model.score().
         explicit_metrics = None
         if isinstance(result, tuple) and len(result) >= 4 and isinstance(result[3], dict):
             explicit_metrics = result[3]
@@ -108,15 +97,13 @@ def track_run(func: Callable) -> Callable:
         else:
             metrics = compute_default_metrics(model, X_test, y_test)
         
-        #Compute dataset hash
         if X_test is not None:
             dataset_hash = get_dataset_hash(X_test, y_test)
         else:
             dataset_hash = "unknown"
         
-        #Create run object
         run = Run(
-            run_id=datetime.now().strftime("%Y%m%d_%H%M%S"),
+            run_id=f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:6]}",
             timestamp=datetime.now(),
             model_name=model_name,
             params=params,
@@ -158,12 +145,6 @@ def track_run(func: Callable) -> Callable:
 
 
 def clear_experiments() -> bool:
-    """
-    Delete all tracked experiments from the database.
-
-    Returns:
-        True if the experiments were cleared successfully, False otherwise.
-    """
     storage = Storage()
     count = storage.get_run_count()
 

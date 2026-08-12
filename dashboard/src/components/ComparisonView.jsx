@@ -5,7 +5,7 @@ import {
   ResponsiveContainer, Tooltip
 } from 'recharts';
 import ExportButton from './ExportButton';
-import { simulatedAccuracy } from '../utils/metrics';
+import { getAccuracyInfo } from '../utils/metrics';
 
 function RunSummaryCard({ run, accentClass }) {
   return (
@@ -76,12 +76,18 @@ function ComparisonView({ run1, run2 }) {
     const samplesScore = (run) => parseFloat((100 * run.dataset_shape[0] / maxSamples).toFixed(1));
     const paramsScore = (run) => parseFloat((100 * Object.keys(run.params).length / maxParams).toFixed(1));
 
-    return [
-      { metric: 'Speed', run1: speedScore(run1), run2: speedScore(run2) },
-      { metric: 'Accuracy', run1: simulatedAccuracy(run1), run2: simulatedAccuracy(run2) },
-      { metric: 'Data Size', run1: samplesScore(run1), run2: samplesScore(run2) },
-      { metric: 'Params', run1: paramsScore(run1), run2: paramsScore(run2) },
-    ];
+    const acc1 = getAccuracyInfo(run1);
+    const acc2 = getAccuracyInfo(run2);
+
+    return {
+      rows: [
+        { metric: 'Speed', run1: speedScore(run1), run2: speedScore(run2) },
+        { metric: 'Accuracy', run1: acc1.value, run2: acc2.value },
+        { metric: 'Data Size', run1: samplesScore(run1), run2: samplesScore(run2) },
+        { metric: 'Params', run1: paramsScore(run1), run2: paramsScore(run2) },
+      ],
+      accuracyIsSimulated: !acc1.isReal || !acc2.isReal,
+    };
   }, [run1, run2]);
 
   return (
@@ -97,10 +103,13 @@ function ComparisonView({ run1, run2 }) {
       <div className="comparison-radar-card">
         <div className="chart-header-text">
           <h3>Multi-Metric Overview</h3>
-          <p className="chart-subtitle">Speed, accuracy, data size, and parameter count — normalized to 0–100</p>
+          <p className="chart-subtitle">
+            Speed, accuracy, data size, and parameter count — normalized to 0–100
+            {radarData.accuracyIsSimulated ? ' (accuracy simulated where not yet captured)' : ''}
+          </p>
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <RadarChart data={radarData} outerRadius="72%">
+          <RadarChart data={radarData.rows} outerRadius="72%">
             <PolarGrid stroke="var(--border-color)" />
             <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
             <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Zap, Trophy, Layers3, Eye } from 'lucide-react';
-import { getFastestRun, getBestAccuracyRun, getMostParamsRun, simulatedAccuracy } from '../../utils/metrics';
+import { getFastestRun, getBestAccuracyRun, getMostParamsRun, getAccuracyInfo } from '../../utils/metrics';
 
 function Leaderboard({ runs, onViewRun }) {
   if (!runs.length) return null;
@@ -8,6 +8,7 @@ function Leaderboard({ runs, onViewRun }) {
   const fastest = getFastestRun(runs);
   const bestAccuracy = getBestAccuracyRun(runs);
   const mostParams = getMostParamsRun(runs);
+  const accuracyInfo = getAccuracyInfo(bestAccuracy);
 
   const cards = [
     {
@@ -21,9 +22,9 @@ function Leaderboard({ runs, onViewRun }) {
     {
       id: 'accuracy',
       icon: Trophy,
-      label: 'Best Accuracy (simulated)',
+      label: accuracyInfo.isReal ? 'Best Accuracy' : 'Best Accuracy (simulated)',
       run: bestAccuracy,
-      metric: `${simulatedAccuracy(bestAccuracy)}%`,
+      metric: `${accuracyInfo.value}%`,
       color: '#ff5b63',
     },
     {

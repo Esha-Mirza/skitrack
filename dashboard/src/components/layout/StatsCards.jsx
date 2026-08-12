@@ -4,10 +4,10 @@ import {
   Cpu, 
   Clock, 
   Hash, 
-  TrendingUp, 
   Calendar,
   Award
 } from 'lucide-react';
+import { getAccuracyInfo } from '../../utils/metrics';
 
 function StatsCards({ runs }) {
   const totalRuns = runs.length;
@@ -22,44 +22,55 @@ function StatsCards({ runs }) {
     new Date(r.timestamp).toDateString() === today
   ).length;
 
-  const bestAccuracy = runs.length ? '96.7%' : 'N/A'; // Simulated
+  let bestAccuracyLabel = 'N/A';
+  let bestAccuracyTitle = undefined;
+  if (runs.length) {
+    const best = runs.reduce((b, r) =>
+      getAccuracyInfo(r).value > getAccuracyInfo(b).value ? r : b, runs[0]);
+    const info = getAccuracyInfo(best);
+    bestAccuracyLabel = `${info.value}%${info.isReal ? '' : '*'}`;
+    bestAccuracyTitle = info.isReal
+      ? undefined
+      : '* Simulated — this run has no real metrics captured yet';
+  }
 
   const cards = [
     { 
       label: 'Total Runs', 
       value: totalRuns, 
       icon: Layers,
-      color: '#667eea',
+      color: '#e01e2b',
     },
     { 
       label: 'Models Used', 
       value: uniqueModels.length, 
       icon: Cpu,
-      color: '#764ba2',
+      color: '#ff5b63',
     },
     { 
       label: 'Avg Training Time', 
       value: `${avgTime.toFixed(3)}s`, 
       icon: Clock,
-      color: '#48bb78',
+      color: '#a3121f',
     },
     { 
       label: 'Total Parameters', 
       value: totalParams, 
       icon: Hash,
-      color: '#f6ad55',
+      color: '#ff8a8f',
     },
     { 
       label: 'Runs Today', 
       value: runsToday, 
       icon: Calendar,
-      color: '#fc8181',
+      color: '#c81124',
     },
     { 
       label: 'Best Accuracy', 
-      value: bestAccuracy, 
+      value: bestAccuracyLabel, 
       icon: Award,
-      color: '#4fd1c5',
+      color: '#ff3b47',
+      title: bestAccuracyTitle,
     },
   ];
 
@@ -74,7 +85,7 @@ function StatsCards({ runs }) {
                 <Icon size={20} />
               </div>
             </div>
-            <div className="stat-value">{card.value}</div>
+            <div className="stat-value" title={card.title}>{card.value}</div>
             <div className="stat-label">{card.label}</div>
           </div>
         );
