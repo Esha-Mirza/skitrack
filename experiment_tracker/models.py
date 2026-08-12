@@ -1,5 +1,3 @@
-
-
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, Any, Optional
@@ -35,8 +33,8 @@ class Run:
 
 
 from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime, Text
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+import ast
 import json
 import os
 
@@ -63,6 +61,11 @@ class RunDB(Base):
     
     def to_dict(self):
         """Convert database record to dictionary."""
+        try:
+            shape = tuple(ast.literal_eval(self.dataset_shape))
+        except (ValueError, SyntaxError):
+            shape = (0, 0)
+
         return {
             'id': self.id,
             'run_id': self.run_id,
@@ -71,7 +74,7 @@ class RunDB(Base):
             'params': json.loads(self.params_json),
             'metrics': json.loads(self.metrics_json),
             'dataset_hash': self.dataset_hash,
-            'dataset_shape': eval(self.dataset_shape),  
+            'dataset_shape': shape,
             'training_time': self.training_time
         }
     
