@@ -1,5 +1,5 @@
 
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris,load_wine
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -18,7 +18,7 @@ from experiment_tracker import track_run
 @track_run
 def test_logistic_regression():
     """Train Logistic Regression on Iris dataset."""
-    iris = load_iris()
+    iris = load_wine()
     X, y = iris.data, iris.target
     
     X_train, X_test, y_train, y_test = train_test_split(
@@ -72,7 +72,7 @@ def test_svm():
 @track_run
 def test_knn():
     """Train KNN on Iris dataset."""
-    iris = load_iris()
+    iris = load_wine()
     X, y = iris.data, iris.target
     
     X_train, X_test, y_train, y_test = train_test_split(
@@ -122,7 +122,7 @@ def test_decision_tree():
 @track_run
 def test_gradient_boosting():
     """Train Gradient Boosting on Iris dataset."""
-    iris = load_iris()
+    iris = load_wine()
     X, y = iris.data, iris.target
     
     X_train, X_test, y_train, y_test = train_test_split(

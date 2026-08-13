@@ -1,6 +1,3 @@
-"""
-API for serving experiment data to the React dashboard.
-"""
 
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -13,12 +10,12 @@ storage = Storage()
 
 @app.route('/api/runs', methods=['GET'])
 def get_runs():
-    """Get all experiments as JSON."""
+
     runs = storage.get_all_runs()
     
 
     for run in runs:
-        run['timestamp'] = str(run['timestamp'])
+        run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
     
     return jsonify({
         'status': 'success',
@@ -33,7 +30,7 @@ def get_run(run_id):
     run = storage.get_run(run_id)
     
     if run:
-        run['timestamp'] = str(run['timestamp'])
+        run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
         return jsonify({
             'status': 'success',
             'data': run

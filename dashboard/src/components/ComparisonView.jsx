@@ -5,6 +5,7 @@ import {
   ResponsiveContainer, Tooltip
 } from 'recharts';
 import ExportButton from './ExportButton';
+import ComparisonChart from './charts/ComparisonChart';
 import { getAccuracyInfo } from '../utils/metrics';
 
 function RunSummaryCard({ run, accentClass }) {
@@ -120,6 +121,8 @@ function ComparisonView({ run1, run2 }) {
           </RadarChart>
         </ResponsiveContainer>
       </div>
+
+      <ComparisonChart run1={run1} run2={run2} />
 
       <div className="comparison-differences">
         <div className="differences-heading">
