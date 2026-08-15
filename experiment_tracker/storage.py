@@ -1,10 +1,10 @@
-
 import os
 import json
+import sqlite3
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from .models import RunDB, Base, Run
@@ -21,6 +21,26 @@ def get_db_path():
     return os.path.join(db_dir, 'experiments.db')
 
 
+def _migrate_schema(engine):
+    """
+    Base.metadata.create_all() only creates tables that don't exist yet —
+    it will NOT add a new column to a 'runs' table that already exists on
+    disk from before this column was introduced. Without this, anyone
+    with an existing experiments.db would hit a hard SQL error on the
+    next save_run() ("table runs has no column named dataset_name").
+    This adds any missing columns in place, preserving existing rows.
+    """
+    inspector = inspect(engine)
+    if 'runs' not in inspector.get_table_names():
+        return  # fresh DB, create_all() already built the correct schema
+
+    existing_columns = {col['name'] for col in inspector.get_columns('runs')}
+    if 'dataset_name' not in existing_columns:
+        with engine.connect() as conn:
+            conn.execute(text('ALTER TABLE runs ADD COLUMN dataset_name VARCHAR(100)'))
+            conn.commit()
+
+
 class Storage:
     
     def __init__(self, db_path=None):
@@ -32,6 +52,7 @@ class Storage:
         self.engine = create_engine(f'sqlite:///{db_path}')
         
         Base.metadata.create_all(self.engine) #Create tables if they don't exist
+        _migrate_schema(self.engine) #Add any columns missing from an existing DB
         
         self.Session = sessionmaker(bind=self.engine) #Create session factory
     
@@ -49,6 +70,7 @@ class Storage:
                 metrics_json=json.dumps(run.metrics),
                 dataset_hash=run.dataset_hash,
                 dataset_shape=str(run.dataset_shape),
+                dataset_name=run.dataset_name,
                 training_time=run.training_time
             )
             

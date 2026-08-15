@@ -1,9 +1,15 @@
-import React from 'react';
-import { Zap, Trophy, Layers3, Eye } from 'lucide-react';
+import { Zap, Trophy, Layers3, Eye, Sparkles } from 'lucide-react';
 import { getFastestRun, getBestAccuracyRun, getMostParamsRun, getAccuracyInfo } from '../../utils/metrics';
 
 function Leaderboard({ runs, onViewRun }) {
-  if (!runs.length) return null;
+  if (!runs.length) {
+    return (
+      <div className="leaderboard-empty">
+        <Sparkles size={20} />
+        <p>Quick highlights will show up here once you&apos;ve tracked a few experiments</p>
+      </div>
+    );
+  }
 
   const fastest = getFastestRun(runs);
   const bestAccuracy = getBestAccuracyRun(runs);

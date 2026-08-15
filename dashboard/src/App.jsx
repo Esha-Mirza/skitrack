@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ThemeProvider } from './context/ThemeContext';
 import { useDarkMode } from './hooks/useDarkMode';
@@ -8,6 +8,7 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import StatsCards from './components/layout/StatsCards';
 import Leaderboard from './components/layout/Leaderboard';
+import DatasetLeaderboard from './components/layout/DatasetLeaderboard';
 
 // Chart Components
 import TrainingTimeChart from './components/charts/TrainingTimeChart';
@@ -82,7 +83,7 @@ function AppContent() {
       <div className="error-container">
         <h2>Error</h2>
         <p>{error}</p>
-        <p>Run: <code>python -c "from experiment_tracker.api import app; app.run(debug=True, port=5000)"</code></p>
+        <p>Run: <code>python -c &quot;from experiment_tracker.api import app; app.run(debug=True, port=5000)&quot;</code></p>
       </div>
     );
   }
@@ -94,6 +95,7 @@ function AppContent() {
           <>
             <StatsCards runs={runs} />
             <Leaderboard runs={runs} onViewRun={setSelectedRun} />
+            <DatasetLeaderboard runs={runs} onViewRun={setSelectedRun} />
             <div className="charts-grid">
               <TrainingTimeChart data={runs} />
               <AccuracyChart data={runs} />
@@ -123,6 +125,7 @@ function AppContent() {
         return (
           <>
             <StatsCards runs={runs} />
+            <DatasetLeaderboard runs={runs} onViewRun={setSelectedRun} />
             <div className="charts-grid charts-grid-featured">
               <TrainingTrendChart data={runs} />
             </div>

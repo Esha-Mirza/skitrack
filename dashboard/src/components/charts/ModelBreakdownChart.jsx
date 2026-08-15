@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer
@@ -38,7 +38,7 @@ function ModelBreakdownChart({ data }) {
   return (
     <div className="chart-card">
       <h3>Model Usage Over Time</h3>
-      <p className="chart-subtitle">Which model types you've been running, by date</p>
+      <p className="chart-subtitle">Which model types you&apos;ve been running, by date</p>
       <ResponsiveContainer width="100%" height={260}>
         <BarChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />

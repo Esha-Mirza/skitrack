@@ -1142,6 +1142,190 @@ button:active {
 }
 
 /* ============================================
+   DATASET LEADERBOARD
+   ============================================ */
+.dataset-leaderboard-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: 14px;
+  margin-bottom: 24px;
+}
+
+.dataset-leaderboard-empty svg {
+  color: var(--accent);
+  opacity: 0.6;
+}
+
+.dataset-leaderboard {
+  margin-bottom: 24px;
+}
+
+.dataset-group-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+  animation: fadeInUp 0.4s ease both;
+}
+
+.dataset-group-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dataset-group-hash {
+  display: block;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.dataset-group-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dataset-group-recommend {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.recommend-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+}
+
+.recommend-model {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dataset-rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dataset-rank-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 80px 70px 130px 32px;
+  align-items: center;
+  gap: 12px;
+}
+
+.dataset-rank-header {
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dataset-rank-header span {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+
+.dataset-rank-stat {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.dataset-rank-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dataset-rank-score .dataset-rank-bar-wrap {
+  flex: 1;
+}
+
+.dataset-rank-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rank-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.dataset-rank-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dataset-rank-model {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dataset-rank-run {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: var(--text-muted);
+}
+
+.dataset-rank-bar-wrap {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  overflow: hidden;
+}
+
+.dataset-rank-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent-gradient);
+  transition: width 0.4s ease;
+}
+
+.dataset-rank-value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.dataset-group-footnote {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ============================================
    DATA CONSISTENCY PANEL
    ============================================ */
 .consistency-panel {

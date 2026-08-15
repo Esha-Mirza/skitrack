@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   PlayCircle, 
   Layers, 
@@ -9,8 +8,7 @@ import {
   Sparkles,
   Rocket,
   Terminal,
-  LayoutDashboard,
-  Settings
+  LayoutDashboard
 } from 'lucide-react';
 
 function HelpPage() {

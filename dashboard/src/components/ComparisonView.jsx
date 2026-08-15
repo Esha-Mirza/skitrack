@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Scale, Clock, Database, Hash, Fingerprint } from 'lucide-react';
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
@@ -52,23 +52,13 @@ function RunSummaryCard({ run, accentClass }) {
 }
 
 function ComparisonView({ run1, run2 }) {
-  if (!run1 || !run2) {
-    return (
-      <div className="comparison-empty">
-        <Scale size={32} />
-        <p>Select two experiments above to compare their runs side by side</p>
-      </div>
-    );
-  }
-
-  const allParams = Array.from(new Set([
-    ...Object.keys(run1.params),
-    ...Object.keys(run2.params)
-  ]));
-
-  const differentCount = allParams.filter(key => run1.params[key] !== run2.params[key]).length;
-
+  // useMemo must run on every render, unconditionally — moving it above
+  // the early return (and guarding inside the callback) fixes a real
+  // React Hooks rule violation: hooks can't be called after a conditional
+  // return, or React loses track of hook order between renders.
   const radarData = useMemo(() => {
+    if (!run1 || !run2) return { rows: [], accuracyIsSimulated: false };
+
     const minTime = Math.min(run1.training_time, run2.training_time) || 1;
     const maxSamples = Math.max(run1.dataset_shape[0], run2.dataset_shape[0]) || 1;
     const maxParams = Math.max(Object.keys(run1.params).length, Object.keys(run2.params).length) || 1;
@@ -90,6 +80,22 @@ function ComparisonView({ run1, run2 }) {
       accuracyIsSimulated: !acc1.isReal || !acc2.isReal,
     };
   }, [run1, run2]);
+
+  if (!run1 || !run2) {
+    return (
+      <div className="comparison-empty">
+        <Scale size={32} />
+        <p>Select two experiments above to compare their runs side by side</p>
+      </div>
+    );
+  }
+
+  const allParams = Array.from(new Set([
+    ...Object.keys(run1.params),
+    ...Object.keys(run2.params)
+  ]));
+
+  const differentCount = allParams.filter(key => run1.params[key] !== run2.params[key]).length;
 
   return (
     <div className="comparison-view">

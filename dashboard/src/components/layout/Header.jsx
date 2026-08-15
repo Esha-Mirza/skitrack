@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCheck } from 'lucide-react';
 import DarkModeToggle from '../ui/DarkModeToggle';
 import SearchBar from '../ui/SearchBar';
@@ -84,7 +84,7 @@ function Header({ onSearch, currentView = 'dashboard' }) {
               </div>
               <div className="dropdown-list">
                 {notifications.length === 0 && (
-                  <div className="dropdown-empty">You're all caught up</div>
+                  <div className="dropdown-empty">You&apos;re all caught up</div>
                 )}
                 {notifications.map(n => (
                   <button
