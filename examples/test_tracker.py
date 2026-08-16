@@ -1,5 +1,5 @@
 
-from sklearn.datasets import load_iris,load_wine
+from sklearn.datasets import load_iris,load_wine,load_breast_cancer,load_diabetes
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -17,7 +17,7 @@ from experiment_tracker import track_run
 # ============================================
 @track_run
 def test_logistic_regression():
-    """Train Logistic Regression on Iris dataset."""
+
     iris = load_wine()
     X, y = iris.data, iris.target
     
@@ -44,7 +44,7 @@ def test_logistic_regression():
 # ============================================
 @track_run
 def test_svm():
-    """Train SVM on Iris dataset."""
+
     iris = load_iris()
     X, y = iris.data, iris.target
     
@@ -71,8 +71,8 @@ def test_svm():
 # ============================================
 @track_run
 def test_knn():
-    """Train KNN on Iris dataset."""
-    iris = load_wine()
+
+    iris = load_breast_cancer()
     X, y = iris.data, iris.target
     
     X_train, X_test, y_train, y_test = train_test_split(
@@ -98,7 +98,7 @@ def test_knn():
 # ============================================
 @track_run
 def test_decision_tree():
-    """Train Decision Tree on Iris dataset."""
+
     iris = load_iris()
     X, y = iris.data, iris.target
     
@@ -121,7 +121,6 @@ def test_decision_tree():
 # ============================================
 @track_run
 def test_gradient_boosting():
-    """Train Gradient Boosting on Iris dataset."""
     iris = load_wine()
     X, y = iris.data, iris.target
     
@@ -144,8 +143,7 @@ def test_gradient_boosting():
 # ============================================
 @track_run
 def test_random_forest():
-    """Train Random Forest on Iris dataset."""
-    iris = load_iris()
+    iris = load_breast_cancer()
     X, y = iris.data, iris.target
     
     X_train, X_test, y_train, y_test = train_test_split(
@@ -163,11 +161,57 @@ def test_random_forest():
 
 
 # ============================================
+# TEST 7: Logistic Regression
+# ============================================
+@track_run
+def test_logistic_regression2():
+    iris = load_diabetes()
+    X, y = iris.data, iris.target
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+    
+    model = LogisticRegression(max_iter=1000, C=1.0, random_state=42)
+    model.fit(X_train_scaled, y_train)
+    
+    y_pred = model.predict(X_test_scaled)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Logistic Regression Accuracy: {accuracy:.4f}")
+    
+    return model, X_test_scaled, y_test
+
+
+# ============================================
+# TEST 4: Decision Tree
+# ============================================
+@track_run
+def test_decision_tree2():
+    iris = load_diabetes()
+    X, y = iris.data, iris.target
+    
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    
+    model = DecisionTreeClassifier(max_depth=5, random_state=42)
+    model.fit(X_train, y_train)
+    
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Decision Tree Accuracy: {accuracy:.4f}")
+    
+    return model, X_test, y_test
+
+
+# ============================================
 # RUN ALL EXPERIMENTS
 # ============================================
 if __name__ == "__main__":
-    print("=" * 60)
-    print("RUNNING MULTIPLE MODELS ON IRIS DATASET")
     print("=" * 60)
     
     print("\nLogistic Regression...")
@@ -187,8 +231,14 @@ if __name__ == "__main__":
     
     print("\nRandom Forest...")
     test_random_forest()
+
+    print("\nLogistic Regression...")
+    test_logistic_regression2()
     
-    print("\n" + "=" * 60)
+    print("\nDecision Tree...")
+    test_decision_tree2()
+    
+    print("\n" + "-" * 60)
     print("All experiments completed!")
     print("Check your dashboard to see the results!")
-    print("=" * 60)
+    print("-" * 60)

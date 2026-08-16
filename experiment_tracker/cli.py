@@ -1,4 +1,3 @@
-
 import click
 import json
 from datetime import datetime
@@ -44,22 +43,26 @@ def list(limit, verbose):
             i,
             run['run_id'],
             run['model_name'],
+            run.get('dataset_name') or '-',
             f"{run['training_time']:.2f}s",
             run['dataset_shape'][0],
             run['dataset_hash'][:8]
         ])
     
-    headers = ["#", "Run ID", "Model", "Time", "Samples", "Hash"]
+    headers = ["#", "Run ID", "Model", "Dataset", "Time", "Samples", "Hash"]
     click.echo(tabulate(table_data, headers=headers, tablefmt="grid"))
     
     if verbose:
-        click.echo("📋 \nDETAILED VIEW:\n")
+        click.echo("\nDETAILED VIEW:\n")
         for run in runs[:3]:  
             click.echo(f"\nRun ID: {run['run_id']}")
             click.echo(f"   Model: {run['model_name']}")
             click.echo(f"   Time: {run['timestamp']}")
             click.echo(f"   Duration: {run['training_time']:.2f}s")
-            click.echo(f"   Dataset: {run['dataset_shape']}")
+            if run.get('dataset_name'):
+                click.echo(f"   Dataset: {run['dataset_name']} {run['dataset_shape']}")
+            else:
+                click.echo(f"   Dataset: {run['dataset_shape']}")
             click.echo(f"   Hash: {run['dataset_hash']}")
             click.echo(f"   Parameters: {len(run['params'])} params")
 
@@ -88,6 +91,8 @@ def show(run_id):
     click.echo(f"Timestamp: {run['timestamp']}")
     click.echo(f"Training time: {run['training_time']:.2f}s")
     click.echo(f"Dataset shape: {run['dataset_shape']}")
+    if run.get('dataset_name'):
+        click.echo(f"Dataset name: {run['dataset_name']}")
     click.echo(f"Dataset hash: {run['dataset_hash']}")
     
     click.echo("\nPARAMETERS:")
@@ -166,8 +171,19 @@ def stats():
     click.echo(f"   - Slowest: {max_time:.2f}s")
     
     click.echo(f"\nModels used:")
-    for model, count in sorted(models.items(), key=lambda x: x[1], reverse=True):
-        click.echo(f"   - {model}: {count} times")
+    for model, model_count in sorted(models.items(), key=lambda x: x[1], reverse=True):
+        click.echo(f"   - {model}: {model_count} times")
+
+    by_dataset = {}
+    for run in runs:
+        key = run.get('dataset_name') or run['dataset_hash']
+        by_dataset.setdefault(key, []).append(run)
+
+    if len(by_dataset) > 1 or (len(by_dataset) == 1 and list(by_dataset.keys())[0] != 'unknown'):
+        click.echo(f"\nDatasets tracked ({len(by_dataset)}):")
+        for name, dataset_runs in sorted(by_dataset.items(), key=lambda x: len(x[1]), reverse=True):
+            dataset_models = sorted(set(r['model_name'] for r in dataset_runs))
+            click.echo(f"   - {name}: {len(dataset_runs)} run(s), models: {', '.join(dataset_models)}")
 
 
 @cli.command()
@@ -182,14 +198,14 @@ def export(output):
         return
     
     fieldnames = ['id','run_id', 'timestamp', 'model_name', 'training_time', 
-                  'dataset_shape', 'dataset_hash', 'params', 'metrics']
+                  'dataset_name', 'dataset_shape', 'dataset_hash', 'params', 'metrics']
     
     with open(output, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         
         for run in runs:
-            row = run.copy()
+            row = {field: run.get(field) for field in fieldnames}
             row['params'] = str(row['params'])
             row['metrics'] = str(row['metrics'])
             row['timestamp'] = str(row['timestamp'])

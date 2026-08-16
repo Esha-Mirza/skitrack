@@ -38,13 +38,10 @@ def get_dataset_hash(X, y=None) -> str:
         else:
             data_str += str(y.tolist())
     
-    #Create hash
+
     return hashlib.md5(data_str.encode()).hexdigest()[:10]
 
 
-# Known (n_features, n_classes) signatures for scikit-learn's built-in toy
-# datasets, used to auto-recognize a friendly dataset name with zero effort
-# from the user. n_classes is None for regression targets.
 _KNOWN_DATASET_SIGNATURES = {
     (4, 3): 'iris',
     (13, 3): 'wine',
@@ -56,14 +53,6 @@ _KNOWN_DATASET_SIGNATURES = {
 
 
 def infer_dataset_signature(X, y=None):
-    """
-    Builds a dataset identity from *schema* (feature count + class labels)
-    rather than exact values. This is the key fix for a common failure
-    mode: the same source dataset produces wildly different content
-    whenever it's scaled, resampled, or split with a different
-    random_state — but its feature count and class labels stay the same
-    regardless. Returns (signature_hash, friendly_name_or_None).
-    """
     try:
         n_features = X.shape[1] if hasattr(X, 'shape') and len(X.shape) > 1 else 1
     except Exception:
@@ -79,9 +68,7 @@ def infer_dataset_signature(X, y=None):
             y_values = []
             unique_vals = []
 
-        # Treat as classification if there are few distinct values relative
-        # to the sample count — otherwise it's a continuous regression target
-        # and class labels aren't a meaningful identity signal.
+
         if 0 < len(unique_vals) <= max(20, int(0.1 * len(y_values))):
             n_classes = len(unique_vals)
             class_labels = tuple(str(v) for v in unique_vals)
@@ -120,13 +107,14 @@ def track_run(func: Callable) -> Callable:
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print("=" * 60)
-        print("Starting experiment tracking...\n")
+        print("_" * 60)
+        print("\nStarting experiment tracking...\n")
   
         
         start_time = time.time()
         
         print("Running your training code...\n")
+        print('_'*60)
         result = func(*args, **kwargs)
         
         end_time = time.time()
@@ -152,20 +140,12 @@ def track_run(func: Callable) -> Callable:
         else:
             metrics = compute_default_metrics(model, X_test, y_test)
 
-        # Optional explicit dataset identity, e.g.:
-        #   return model, X_test, y_test, metrics, "iris"
-        # If not provided, we auto-detect it below — most users training a
-        # model the normal way shouldn't have to name their dataset by hand.
         explicit_dataset_name = None
         if isinstance(result, tuple) and len(result) >= 5 and isinstance(result[4], str):
             explicit_dataset_name = result[4]
 
         if X_test is not None:
-            # Schema-based signature (feature count + class labels) instead
-            # of a raw content hash — this stays IDENTICAL for the same
-            # source dataset regardless of feature scaling, resampling, or
-            # which random_state train_test_split() used, which a raw
-            # content hash cannot guarantee.
+
             dataset_hash, detected_name = infer_dataset_signature(X_test, y_test)
         else:
             dataset_hash = "unknown"
@@ -186,7 +166,7 @@ def track_run(func: Callable) -> Callable:
         )
         
 
-    
+        print('_'*60)
         print("\n---Experiment tracked!---\n")
         print(f"Run ID: {run.run_id}")
         print(f"Model: {run.model_name}")
@@ -201,7 +181,7 @@ def track_run(func: Callable) -> Callable:
             print(f"Metrics: " + ", ".join(f"{k}={v:.4f}" for k, v in run.metrics.items()))
         else:
             print("Metrics: (none captured)")
-        print()
+        print("_"*60)
         
         
         try:
@@ -213,7 +193,7 @@ def track_run(func: Callable) -> Callable:
                 print("Warning: Could not save to database")
         except Exception as e:
             print(f"Warning: Database error: {e}")
-        
+        print('_'*60)
         return result
     
     return wrapper

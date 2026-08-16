@@ -8,7 +8,7 @@ import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import StatsCards from './components/layout/StatsCards';
 import Leaderboard from './components/layout/Leaderboard';
-import DatasetLeaderboard from './components/layout/DatasetLeaderboard';
+import DatasetLeaderboard from './components/layout/Datasetleaderboard';
 
 // Chart Components
 import TrainingTimeChart from './components/charts/TrainingTimeChart';
