@@ -12,12 +12,13 @@ storage = Storage()
 def cli():
     """
     Commands:
-        list    Show all experiments
-        show    Show details of a specific experiment
-        delete  Delete an experiment
-        clear   Delete ALL experiments
-        stats   Show statistics
-        export  Export experiments to CSV
+        list      Show all experiments
+        show      Show details of a specific experiment
+        delete    Delete an experiment
+        clear     Delete ALL experiments
+        stats     Show statistics
+        export    Export experiments to CSV
+        dashboard Launch the web dashboard
     """
     pass
 
@@ -184,6 +185,26 @@ def stats():
         for name, dataset_runs in sorted(by_dataset.items(), key=lambda x: len(x[1]), reverse=True):
             dataset_models = sorted(set(r['model_name'] for r in dataset_runs))
             click.echo(f"   - {name}: {len(dataset_runs)} run(s), models: {', '.join(dataset_models)}")
+
+
+@cli.command()
+@click.option('--port', default=5000, help='Port to run the dashboard on')
+@click.option('--no-browser', is_flag=True, help="Don't automatically open a browser tab")
+
+def dashboard(port, no_browser):
+
+    import webbrowser
+    import threading
+    from .api import app
+
+    url = f'http://127.0.0.1:{port}'
+    click.echo(f"\nStarting dashboard at {url}")
+    click.echo("Press CTRL+C to stop\n")
+
+    if not no_browser:
+        threading.Timer(1.5, lambda: webbrowser.open(url)).start()
+
+    app.run(port=port, debug=False)
 
 
 @cli.command()

@@ -6,7 +6,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.vite', 'node_modules']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -24,11 +24,6 @@ export default defineConfig([
       react: { version: 'detect' },
     },
     rules: {
-      // This project doesn't use PropTypes or TypeScript anywhere. Enforcing
-      // this rule would mean installing prop-types and annotating every prop
-      // across every component — a much larger, separate undertaking, not
-      // part of getting the linter itself working. Revisit if the project
-      // adopts TypeScript or PropTypes later.
       'react/prop-types': 'off',
     },
   },

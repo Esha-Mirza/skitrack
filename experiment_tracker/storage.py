@@ -22,17 +22,9 @@ def get_db_path():
 
 
 def _migrate_schema(engine):
-    """
-    Base.metadata.create_all() only creates tables that don't exist yet —
-    it will NOT add a new column to a 'runs' table that already exists on
-    disk from before this column was introduced. Without this, anyone
-    with an existing experiments.db would hit a hard SQL error on the
-    next save_run() ("table runs has no column named dataset_name").
-    This adds any missing columns in place, preserving existing rows.
-    """
     inspector = inspect(engine)
     if 'runs' not in inspector.get_table_names():
-        return  # fresh DB, create_all() already built the correct schema
+        return
 
     existing_columns = {col['name'] for col in inspector.get_columns('runs')}
     if 'dataset_name' not in existing_columns:
@@ -51,17 +43,16 @@ class Storage:
         self.db_path = db_path
         self.engine = create_engine(f'sqlite:///{db_path}')
         
-        Base.metadata.create_all(self.engine) #Create tables if they don't exist
-        _migrate_schema(self.engine) #Add any columns missing from an existing DB
+        Base.metadata.create_all(self.engine) 
+        _migrate_schema(self.engine) 
         
-        self.Session = sessionmaker(bind=self.engine) #Create session factory
+        self.Session = sessionmaker(bind=self.engine)
     
     def save_run(self, run: Run) -> bool:
 
         try:
             session = self.Session()
-            
-            #Convert dataclass to database model
+
             run_db = RunDB(
                 run_id=run.run_id,
                 timestamp=run.timestamp,

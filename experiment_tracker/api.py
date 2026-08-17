@@ -1,12 +1,13 @@
-
-from flask import Flask, jsonify
+import os
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from .storage import Storage
 
-app = Flask(__name__)
-CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])  
-storage = Storage()
+STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 
+app = Flask(__name__, static_folder=None)
+CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])
+storage = Storage()
 
 @app.route('/api/runs', methods=['GET'])
 def get_runs():
@@ -23,10 +24,8 @@ def get_runs():
         'data': runs
     })
 
-
 @app.route('/api/runs/<run_id>', methods=['GET'])
 def get_run(run_id):
-    """Get a specific experiment by ID."""
     run = storage.get_run(run_id)
     
     if run:
@@ -41,6 +40,12 @@ def get_run(run_id):
             'message': f'Run {run_id} not found'
         }), 404
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_dashboard(path):
+    if path and os.path.exists(os.path.join(STATIC_DIR, path)):
+        return send_from_directory(STATIC_DIR, path)
+    return send_from_directory(STATIC_DIR, 'index.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

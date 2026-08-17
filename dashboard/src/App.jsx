@@ -53,7 +53,7 @@ function AppContent() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/runs');
+        const response = await axios.get('/api/runs');
         setRuns(response.data.data);
         setLoading(false);
       } catch (err) {
