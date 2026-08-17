@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeftRight, X, FlaskConical } from 'lucide-react';
 
 function ComparisonSelector({ runs, selectedRuns, onSelect, onSwap, onClear }) {

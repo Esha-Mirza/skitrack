@@ -1,4 +1,3 @@
-import React from 'react';
 import { Moon, Sun, Bell, Database, Info } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 

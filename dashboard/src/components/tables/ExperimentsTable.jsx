@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown, Eye, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PAGE_SIZE = 10;

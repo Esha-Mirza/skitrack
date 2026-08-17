@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { X, Clock, Database, Hash, Fingerprint, Target } from 'lucide-react';
 import ExportButton from '../ExportButton';
 

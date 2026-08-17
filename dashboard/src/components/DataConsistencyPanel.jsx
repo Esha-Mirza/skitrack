@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertTriangle, ShieldCheck } from 'lucide-react';
 import { findDataConsistencyIssues } from '../utils/metrics';
 

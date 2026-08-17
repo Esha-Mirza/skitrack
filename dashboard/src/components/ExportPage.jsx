@@ -1,4 +1,3 @@
-import React from 'react';
 import { FileDown, Sparkles } from 'lucide-react';
 import ExportButton from './ExportButton';
 import { downloadSummaryReport } from './ReportGenerator';

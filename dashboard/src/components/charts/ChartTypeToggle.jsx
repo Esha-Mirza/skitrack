@@ -1,4 +1,3 @@
-import React from 'react';
 import { BarChart3, LineChart, AreaChart } from 'lucide-react';
 
 const chartTypes = [
