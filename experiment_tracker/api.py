@@ -3,7 +3,11 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from .storage import Storage
 
-STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+
+STATIC_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), '..', 'dashboard', 'dist'
+)
+STATIC_DIR = os.path.normpath(STATIC_DIR)
 
 app = Flask(__name__, static_folder=None)
 CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])
@@ -11,13 +15,11 @@ storage = Storage()
 
 @app.route('/api/runs', methods=['GET'])
 def get_runs():
-
     runs = storage.get_all_runs()
-    
 
     for run in runs:
         run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
-    
+
     return jsonify({
         'status': 'success',
         'count': len(runs),
@@ -27,7 +29,7 @@ def get_runs():
 @app.route('/api/runs/<run_id>', methods=['GET'])
 def get_run(run_id):
     run = storage.get_run(run_id)
-    
+
     if run:
         run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
         return jsonify({
