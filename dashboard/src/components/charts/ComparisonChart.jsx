@@ -27,11 +27,6 @@ const METRICS = {
   accuracy: {
     label: 'Accuracy',
     unit: '%',
-    // Accuracy is a bounded 0-100% value, not an open-ended count like the
-    // others — two close percentages (or one near 0 for a run with no real
-    // metrics yet) don't read as a meaningful comparison on a linear bar.
-    // A radial gauge shows "how full" each run is, which is the actually
-    // meaningful comparison for a percentage metric.
     chartType: 'radial',
     getValue: (run) => getAccuracyInfo(run).value,
     isRealValue: (run) => getAccuracyInfo(run).isReal,
@@ -68,8 +63,6 @@ function BarComparison({ chartData, metric }) {
 }
 
 function RadialComparison({ chartData }) {
-  // Two concentric rings, each filled to its run's accuracy percentage —
-  // outer ring is run1, inner ring is run2.
   const radialData = [
     { name: chartData[0].name, value: chartData[0].value, fill: 'var(--accent)' },
     { name: chartData[1].name, value: chartData[1].value, fill: '#6e5a5c' },
