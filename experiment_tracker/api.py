@@ -4,50 +4,66 @@ from flask_cors import CORS
 from .storage import Storage
 
 
-STATIC_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), '..', 'dashboard', 'dist'
+PACKAGE_STATIC_DIR = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "static"
 )
-STATIC_DIR = os.path.normpath(STATIC_DIR)
+SOURCE_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SOURCE_DASHBOARD_DIR = os.path.join(SOURCE_ROOT, "dashboard", "dist")
+
+STATIC_DIR = (
+    SOURCE_DASHBOARD_DIR
+    if os.path.isdir(SOURCE_DASHBOARD_DIR)
+    else PACKAGE_STATIC_DIR
+)
 
 app = Flask(__name__, static_folder=None)
-CORS(app, origins=['http://localhost:5173', 'http://127.0.0.1:5173'])
+CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"])
 storage = Storage()
 
-@app.route('/api/runs', methods=['GET'])
+
+@app.route("/api/runs", methods=["GET"])
 def get_runs():
     runs = storage.get_all_runs()
 
     for run in runs:
-        run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
+        run["timestamp"] = run["timestamp"].isoformat(timespec="milliseconds")
 
-    return jsonify({
-        'status': 'success',
-        'count': len(runs),
-        'data': runs
-    })
+    return jsonify(
+        {
+            "status": "success",
+            "count": len(runs),
+            "data": runs,
+        }
+    )
 
-@app.route('/api/runs/<run_id>', methods=['GET'])
+
+@app.route("/api/runs/<run_id>", methods=["GET"])
 def get_run(run_id):
     run = storage.get_run(run_id)
 
     if run:
-        run['timestamp'] = run['timestamp'].isoformat(timespec='milliseconds')
-        return jsonify({
-            'status': 'success',
-            'data': run
-        })
-    else:
-        return jsonify({
-            'status': 'error',
-            'message': f'Run {run_id} not found'
-        }), 404
+        run["timestamp"] = run["timestamp"].isoformat(timespec="milliseconds")
+        return jsonify({"status": "success", "data": run})
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+    return jsonify(
+        {
+            "status": "error",
+            "message": f"Run {run_id} not found",
+        }
+    ), 404
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
 def serve_dashboard(path):
-    if path and os.path.exists(os.path.join(STATIC_DIR, path)):
-        return send_from_directory(STATIC_DIR, path)
-    return send_from_directory(STATIC_DIR, 'index.html')
 
-if __name__ == '__main__':
+    if path:
+        candidate = os.path.join(STATIC_DIR, path)
+        if os.path.isfile(candidate):
+            return send_from_directory(STATIC_DIR, path)
+
+    return send_from_directory(STATIC_DIR, "index.html")
+
+
+if __name__ == "__main__":
     app.run(debug=True, port=5000)

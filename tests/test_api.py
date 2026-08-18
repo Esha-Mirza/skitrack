@@ -2,7 +2,6 @@
 import pytest
 from experiment_tracker import api as api_module
 
-
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     db_path = str(tmp_path / "api_test.db")
@@ -88,3 +87,9 @@ def test_unknown_path_falls_back_to_index(client):
     response = client.get("/some/made/up/path")
     assert response.status_code == 200
     assert b"<div id=\"root\">" in response.data
+
+def test_dashboard_uses_package_static_directory():
+    import os
+    assert os.path.basename(api_module.STATIC_DIR) == "dist" or os.path.basename(api_module.STATIC_DIR) == "static"
+    if os.path.basename(api_module.STATIC_DIR) == "static":
+        assert os.path.isfile(os.path.join(api_module.STATIC_DIR, "index.html"))

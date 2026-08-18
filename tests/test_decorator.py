@@ -108,7 +108,7 @@ def test_dataset_auto_detected_despite_scaling_differences(tracked_storage):
         X_test_s = scaler.transform(X_test)
         model = LogisticRegression(max_iter=1000)
         model.fit(X_train_s, y_train)
-        return model, X_test_s, y_test
+        return model, X_test_s, y_test, None, None, (iris.data, iris.target)
 
     @track_run
     def train_unscaled():
@@ -116,7 +116,7 @@ def test_dataset_auto_detected_despite_scaling_differences(tracked_storage):
         X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.3, random_state=99)
         model = DecisionTreeClassifier()
         model.fit(X_train, y_train)
-        return model, X_test, y_test
+        return model, X_test, y_test, None, None, (iris.data, iris.target)
 
     train_scaled()
     train_unscaled()
@@ -171,3 +171,35 @@ def test_unknown_custom_dataset_gets_no_friendly_name_but_still_groups():
     hash2, name2 = infer_dataset_signature(X, y)
     assert name1 is None
     assert hash1 == hash2 
+
+def test_dataset_hash_is_full_sha256_and_changes_when_data_changes():
+    import numpy as np
+    from experiment_tracker.decorator import get_dataset_hash
+
+    X = np.array([[1, 2], [3, 4]], dtype=np.int64)
+    y = np.array([0, 1], dtype=np.int64)
+
+    first = get_dataset_hash(X, y)
+    second = get_dataset_hash(X.copy(), y.copy())
+    changed = get_dataset_hash(X, np.array([1, 0], dtype=np.int64))
+
+    assert len(first) == 64
+    assert first == second
+    assert first != changed
+
+
+def test_full_dataset_payload_controls_dataset_hash_and_shape(tracked_storage):
+    @track_run
+    def train():
+        iris = load_iris()
+        X_train, X_test, y_train, y_test = train_test_split(
+            iris.data, iris.target, test_size=0.2, random_state=42
+        )
+        model = RandomForestClassifier(n_estimators=5, random_state=42)
+        model.fit(X_train, y_train)
+        return model, X_test, y_test, None, None, (iris.data, iris.target)
+
+    train()
+    run = tracked_storage.get_all_runs()[0]
+    assert run["dataset_shape"] == (150, 4)
+    assert len(run["dataset_hash"]) == 64

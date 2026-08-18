@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="experiment-tracker",
@@ -8,7 +8,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        "experiment_tracker": ["static/**/*", "static/**/**/*"],
+        "experiment_tracker": [
+            "static/*",
+            "static/**/*",
+        ],
     },
     install_requires=[
         "pandas>=2.0.0",
