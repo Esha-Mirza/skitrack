@@ -28,16 +28,15 @@ def cli():
 @click.option('--verbose', is_flag=True, help='Show more details')
 def list(limit, verbose):
     runs = storage.get_all_runs()
-    
+
     if not runs:
         click.echo("No experiments found. Run some models first!")
         return
-    
 
     runs = runs[:limit]
-  
+
     click.echo(f"\nEXPERIMENTS (showing {len(runs)} of {storage.get_run_count()} total)\n")
-  
+
     table_data = []
     for i, run in enumerate(runs, 1):
         table_data.append([
@@ -46,30 +45,35 @@ def list(limit, verbose):
             run['model_name'],
             run.get('dataset_name') or '-',
             f"{run['training_time']:.2f}s",
-            run['dataset_shape'][0],
-            run['dataset_hash'][:8]
+            run['dataset_shape'][0] if run['dataset_shape'] else '-',
+            run['dataset_hash'][:8] if run['dataset_hash'] else '-'
         ])
-    
+
     headers = ["#", "Run ID", "Model", "Dataset", "Time", "Samples", "Hash"]
     click.echo(tabulate(table_data, headers=headers, tablefmt="grid"))
-    
+
     if verbose:
         click.echo("\nDETAILED VIEW:\n")
-        for run in runs[:3]:  
+        for run in runs[:3]:
             click.echo(f"\nRun ID: {run['run_id']}")
             click.echo(f"   Model: {run['model_name']}")
             click.echo(f"   Time: {run['timestamp']}")
             click.echo(f"   Duration: {run['training_time']:.2f}s")
+
             if run.get('dataset_name'):
                 click.echo(f"   Dataset: {run['dataset_name']} {run['dataset_shape']}")
-            else:
+            elif run['dataset_shape']:
                 click.echo(f"   Dataset: {run['dataset_shape']}")
-            click.echo(f"   Hash: {run['dataset_hash']}")
+            else:
+                click.echo("   Dataset: not captured")
+
+            click.echo(f"   Hash: {run['dataset_hash'] or 'not captured'}")
             click.echo(f"   Parameters: {len(run['params'])} params")
 
             params = list(run['params'].items())[:5]
             for key, value in params:
                 click.echo(f"      - {key}: {value}")
+
             if len(run['params']) > 5:
                 click.echo(f"      ... and {len(run['params']) - 5} more")
     else:
@@ -80,26 +84,27 @@ def list(limit, verbose):
 @click.argument('run_id')
 def show(run_id):
     run = storage.get_run(run_id)
-    
+
     if not run:
         click.echo(f"No experiment found with ID: {run_id}")
         return
-    
-    click.echo(f"\nEXPERIMENT DETAILS: {run_id}\n")
 
+    click.echo(f"\nEXPERIMENT DETAILS: {run_id}\n")
     click.echo(f"\nRun ID: {run['run_id']}")
     click.echo(f"Model: {run['model_name']}")
     click.echo(f"Timestamp: {run['timestamp']}")
     click.echo(f"Training time: {run['training_time']:.2f}s")
-    click.echo(f"Dataset shape: {run['dataset_shape']}")
+    click.echo(f"Dataset shape: {run['dataset_shape'] or 'not captured'}")
+
     if run.get('dataset_name'):
         click.echo(f"Dataset name: {run['dataset_name']}")
-    click.echo(f"Dataset hash: {run['dataset_hash']}")
-    
+
+    click.echo(f"Dataset hash: {run['dataset_hash'] or 'not captured'}")
+
     click.echo("\nPARAMETERS:")
     for key, value in run['params'].items():
         click.echo(f"   - {key}: {value}")
-    
+
     if run['metrics']:
         click.echo("\nMETRICS:")
         for key, value in run['metrics'].items():
@@ -115,9 +120,9 @@ def delete(run_id):
     if not click.confirm(f"Are you sure you want to delete run {run_id}?"):
         click.echo("Deletion cancelled")
         return
-    
+
     success = storage.delete_run(run_id)
-    
+
     if success:
         click.echo(f"Deleted run: {run_id}")
     else:
@@ -128,13 +133,13 @@ def delete(run_id):
 @click.confirmation_option(prompt="Delete ALL experiments? This cannot be undone!")
 def clear():
     count = storage.get_run_count()
-    
+
     if count == 0:
         click.echo("No experiments to delete")
         return
-    
+
     success = storage.delete_all_runs()
-    
+
     if success:
         click.echo(f"Deleted all {count} experiments")
     else:
@@ -145,54 +150,63 @@ def clear():
 def stats():
     runs = storage.get_all_runs()
     count = len(runs)
-    
+
     if count == 0:
         click.echo("No experiments to analyze")
         return
 
     models = {}
     times = []
-    
+
     for run in runs:
         model = run['model_name']
         models[model] = models.get(model, 0) + 1
         times.append(run['training_time'])
-    
+
     avg_time = sum(times) / len(times)
     min_time = min(times)
     max_time = max(times)
-    
+
     click.echo("\nEXPERIMENT STATISTICS\n")
-    
     click.echo(f"\nTotal experiments: {count}")
     click.echo(f"Total models used: {len(models)}")
-    click.echo(f"\nTraining times:")
+    click.echo("\nTraining times:")
     click.echo(f"   - Average: {avg_time:.2f}s")
     click.echo(f"   - Fastest: {min_time:.2f}s")
     click.echo(f"   - Slowest: {max_time:.2f}s")
-    
-    click.echo(f"\nModels used:")
+
+    click.echo("\nModels used:")
     for model, model_count in sorted(models.items(), key=lambda x: x[1], reverse=True):
         click.echo(f"   - {model}: {model_count} times")
 
     by_dataset = {}
+
     for run in runs:
+        if not run.get('dataset_hash'):
+            continue
+
         key = run.get('dataset_name') or run['dataset_hash']
         by_dataset.setdefault(key, []).append(run)
 
-    if len(by_dataset) > 1 or (len(by_dataset) == 1 and list(by_dataset.keys())[0] != 'unknown'):
+    if by_dataset:
         click.echo(f"\nDatasets tracked ({len(by_dataset)}):")
-        for name, dataset_runs in sorted(by_dataset.items(), key=lambda x: len(x[1]), reverse=True):
+
+        for name, dataset_runs in sorted(
+            by_dataset.items(),
+            key=lambda x: len(x[1]),
+            reverse=True
+        ):
             dataset_models = sorted(set(r['model_name'] for r in dataset_runs))
-            click.echo(f"   - {name}: {len(dataset_runs)} run(s), models: {', '.join(dataset_models)}")
+            click.echo(
+                f"   - {name}: {len(dataset_runs)} run(s), "
+                f"models: {', '.join(dataset_models)}"
+            )
 
 
 @cli.command()
 @click.option('--port', default=5000, help='Port to run the dashboard on')
 @click.option('--no-browser', is_flag=True, help="Don't automatically open a browser tab")
-
 def dashboard(port, no_browser):
-
     import webbrowser
     import threading
     from .api import app
@@ -211,25 +225,35 @@ def dashboard(port, no_browser):
 @click.option('--output', default='experiments.csv', help='Output file name')
 def export(output):
     import csv
-    
+
     runs = storage.get_all_runs()
-    
+
     if not runs:
         click.echo("No experiments to export")
         return
-    
-    fieldnames = ['id','run_id', 'timestamp', 'model_name', 'training_time', 
-                  'dataset_name', 'dataset_shape', 'dataset_hash', 'params', 'metrics']
-    
+
+    fieldnames = [
+        'id',
+        'run_id',
+        'timestamp',
+        'model_name',
+        'training_time',
+        'dataset_name',
+        'dataset_shape',
+        'dataset_hash',
+        'params',
+        'metrics'
+    ]
+
     with open(output, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        
+
         for run in runs:
             row = {field: run.get(field) for field in fieldnames}
             row['params'] = str(row['params'])
             row['metrics'] = str(row['metrics'])
             row['timestamp'] = str(row['timestamp'])
             writer.writerow(row)
-    
+
     click.echo(f"Exported {len(runs)} experiments to {output}")

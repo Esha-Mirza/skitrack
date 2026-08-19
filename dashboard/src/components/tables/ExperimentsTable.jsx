@@ -24,7 +24,7 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
   const sortedRuns = [...filteredRuns].sort((a, b) => {
     let aVal = a[sortField];
     let bVal = b[sortField];
-    
+
     if (sortField === 'training_time') {
       aVal = a.training_time;
       bVal = b.training_time;
@@ -32,16 +32,19 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
       aVal = Object.keys(a.params).length;
       bVal = Object.keys(b.params).length;
     } else if (sortField === 'samples') {
-      aVal = a.dataset_shape[0];
-      bVal = b.dataset_shape[0];
+      aVal = a.dataset_shape ? a.dataset_shape[0] : null;
+      bVal = b.dataset_shape ? b.dataset_shape[0] : null;
     }
-    
+
+    if (aVal === null && bVal !== null) return 1;
+    if (aVal !== null && bVal === null) return -1;
     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
   });
 
   const totalPages = Math.max(1, Math.ceil(sortedRuns.length / PAGE_SIZE));
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, filterModel, sortField, sortDirection, runs.length]);
@@ -79,7 +82,7 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
       <div className="table-header">
         <h2>Experiments</h2>
         <div className="table-controls">
-          <select 
+          <select
             className="filter-select"
             value={filterModel}
             onChange={(e) => setFilterModel(e.target.value)}
@@ -92,6 +95,7 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
           <span className="table-count">{filteredRuns.length} runs</span>
         </div>
       </div>
+
       <div className="table-wrapper">
         <table className="experiments-table">
           <thead>
@@ -117,6 +121,7 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {paginatedRuns.map((run, index) => (
               <tr key={run.id}>
@@ -126,10 +131,10 @@ function ExperimentsTable({ runs, onViewRun, searchQuery = '' }) {
                   <span className="model-badge">{run.model_name}</span>
                 </td>
                 <td>{run.training_time.toFixed(3)}</td>
-                <td>{run.dataset_shape[0]}</td>
+                <td>{run.dataset_shape ? run.dataset_shape[0] : 'Not captured'}</td>
                 <td>{Object.keys(run.params).length}</td>
                 <td>
-                  <button 
+                  <button
                     className="view-btn"
                     onClick={() => onViewRun(run)}
                   >

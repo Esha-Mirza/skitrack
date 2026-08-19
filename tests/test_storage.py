@@ -1,28 +1,27 @@
-
 import sqlite3
+
+from sqlalchemy import inspect
+
 from experiment_tracker.storage import Storage
 
 
 def test_save_and_retrieve_run(storage, make_run):
-    run = make_run(run_id="run_a")
+    run = make_run(run_id="run_a", dataset_hash="a" * 64)
     assert storage.save_run(run) is True
-
     all_runs = storage.get_all_runs()
     assert len(all_runs) == 1
     assert all_runs[0]["run_id"] == "run_a"
     assert all_runs[0]["model_name"] == "RandomForestClassifier"
+    assert all_runs[0]["dataset_hash"] == "a" * 64
 
 
 def test_get_specific_run(storage, make_run):
     storage.save_run(make_run(run_id="run_a"))
     storage.save_run(make_run(run_id="run_b"))
-
     found = storage.get_run("run_b")
     assert found is not None
     assert found["run_id"] == "run_b"
-
-    missing = storage.get_run("does_not_exist")
-    assert missing is None
+    assert storage.get_run("does_not_exist") is None
 
 
 def test_run_count(storage, make_run):
@@ -35,7 +34,6 @@ def test_run_count(storage, make_run):
 def test_delete_run(storage, make_run):
     storage.save_run(make_run(run_id="run_a"))
     assert storage.get_run_count() == 1
-
     assert storage.delete_run("run_a") is True
     assert storage.get_run_count() == 0
 
@@ -45,7 +43,6 @@ def test_delete_all_runs(storage, make_run):
     storage.save_run(make_run(run_id="run_b"))
     storage.save_run(make_run(run_id="run_c"))
     assert storage.get_run_count() == 3
-
     assert storage.delete_all_runs() is True
     assert storage.get_run_count() == 0
 
@@ -58,20 +55,24 @@ def test_duplicate_run_id_fails_gracefully(storage, make_run):
 
 def test_dataset_name_field_round_trips(storage, make_run):
     storage.save_run(make_run(run_id="run_a", dataset_name="wine"))
-    run = storage.get_run("run_a")
-    assert run["dataset_name"] == "wine"
+    assert storage.get_run("run_a")["dataset_name"] == "wine"
 
 
 def test_dataset_name_defaults_to_none(storage, make_run):
     storage.save_run(make_run(run_id="run_a", dataset_name=None))
-    run = storage.get_run("run_a")
-    assert run["dataset_name"] is None
+    assert storage.get_run("run_a")["dataset_name"] is None
 
 
-def test_migration_adds_dataset_name_to_legacy_db(tmp_path):
+def test_full_dataset_hash_round_trips(storage, make_run):
+    dataset_hash = "f" * 64
+    storage.save_run(make_run(run_id="hash_run", dataset_hash=dataset_hash))
+    run = storage.get_run("hash_run")
+    assert run["dataset_hash"] == dataset_hash
+    assert len(run["dataset_hash"]) == 64
 
+
+def test_migration_adds_dataset_name_and_expands_dataset_hash(tmp_path):
     db_path = str(tmp_path / "legacy.db")
-
     conn = sqlite3.connect(db_path)
     conn.execute("""
         CREATE TABLE runs (
@@ -87,10 +88,20 @@ def test_migration_adds_dataset_name_to_legacy_db(tmp_path):
         )
     """)
     conn.execute("""
-        INSERT INTO runs (run_id, timestamp, model_name, params_json, metrics_json,
-                           dataset_hash, dataset_shape, training_time)
-        VALUES ('legacy_run', '2026-01-01T00:00:00', 'OldModel', '{}', '{}',
-                'oldhash', '(100, 4)', 0.5)
+        INSERT INTO runs (
+            run_id, timestamp, model_name, params_json, metrics_json,
+            dataset_hash, dataset_shape, training_time
+        )
+        VALUES (
+            'legacy_run',
+            '2026-01-01T00:00:00',
+            'OldModel',
+            '{}',
+            '{}',
+            'oldhash',
+            '(100, 4)',
+            0.5
+        )
     """)
     conn.commit()
     conn.close()
@@ -100,14 +111,31 @@ def test_migration_adds_dataset_name_to_legacy_db(tmp_path):
 
     assert len(runs) == 1
     assert runs[0]["run_id"] == "legacy_run"
-    assert runs[0]["dataset_name"] is None  
+    assert runs[0]["dataset_name"] is None
+    assert runs[0]["dataset_hash"] == "oldhash"
 
-    from experiment_tracker.models import Run
+    inspector = inspect(storage.engine)
+    column = next(column for column in inspector.get_columns("runs") if column["name"] == "dataset_hash")
+    assert "VARCHAR(64)" in str(column["type"]).upper()
+
     from datetime import datetime
+    from experiment_tracker.models import Run
+
+    new_hash = "b" * 64
     new_run = Run(
-        run_id="new_run", timestamp=datetime.now(), model_name="NewModel",
-        params={}, metrics={}, dataset_hash="newhash", dataset_shape=(50, 3),
-        training_time=0.1, dataset_name="iris",
+        run_id="new_run",
+        timestamp=datetime.now(),
+        model_name="NewModel",
+        params={},
+        metrics={},
+        dataset_hash=new_hash,
+        dataset_shape=(50, 3),
+        training_time=0.1,
+        dataset_name="iris",
     )
+
     assert storage.save_run(new_run) is True
+    saved = storage.get_run("new_run")
+    assert saved["dataset_hash"] == new_hash
+    assert len(saved["dataset_hash"]) == 64
     assert storage.get_run_count() == 2

@@ -10,26 +10,27 @@ const METRICS = {
     label: 'Training Time',
     unit: 's',
     chartType: 'bar',
-    getValue: (run) => parseFloat(run.training_time.toFixed(3)),
+    getValue: run => parseFloat(run.training_time.toFixed(3)),
   },
   params: {
     label: 'Parameters',
     unit: '',
     chartType: 'bar',
-    getValue: (run) => Object.keys(run.params).length,
+    getValue: run => Object.keys(run.params).length,
   },
   samples: {
     label: 'Samples',
     unit: '',
     chartType: 'bar',
-    getValue: (run) => run.dataset_shape[0],
+    getValue: run => run.dataset_shape ? run.dataset_shape[0] : null,
+    isRealValue: run => Boolean(run.dataset_shape),
   },
   accuracy: {
     label: 'Accuracy',
     unit: '%',
     chartType: 'radial',
-    getValue: (run) => getAccuracyInfo(run).value,
-    isRealValue: (run) => getAccuracyInfo(run).isReal,
+    getValue: run => getAccuracyInfo(run).value,
+    isRealValue: run => getAccuracyInfo(run).isReal,
   },
 };
 
@@ -51,7 +52,7 @@ function BarComparison({ chartData, metric }) {
           labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
           itemStyle={{ color: 'var(--text-secondary)' }}
           cursor={{ fill: 'var(--accent-light)' }}
-          formatter={(value) => [`${value}${metric.unit}`, metric.label]}
+          formatter={value => [`${value}${metric.unit}`, metric.label]}
         />
         <Bar dataKey="value" name={metric.label} radius={[6, 6, 0, 0]} maxBarSize={60}>
           <Cell fill="var(--accent)" />
@@ -89,7 +90,7 @@ function RadialComparison({ chartData }) {
             contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
             labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
             itemStyle={{ color: 'var(--text-secondary)' }}
-            formatter={(value) => [`${value}%`, 'Accuracy']}
+            formatter={value => [`${value}%`, 'Accuracy']}
           />
         </RadialBarChart>
       </ResponsiveContainer>
@@ -111,10 +112,20 @@ function ComparisonChart({ run1, run2 }) {
 
   const chartData = useMemo(() => {
     if (!run1 || !run2) return [];
+
     const metric = METRICS[metricKey];
+
     return [
-      { name: run1.run_id.slice(-6), model: run1.model_name, value: metric.getValue(run1) },
-      { name: run2.run_id.slice(-6), model: run2.model_name, value: metric.getValue(run2) },
+      {
+        name: run1.run_id.slice(-6),
+        model: run1.model_name,
+        value: metric.getValue(run1),
+      },
+      {
+        name: run2.run_id.slice(-6),
+        model: run2.model_name,
+        value: metric.getValue(run2),
+      },
     ];
   }, [run1, run2, metricKey]);
 
@@ -128,7 +139,66 @@ function ComparisonChart({ run1, run2 }) {
   }
 
   const metric = METRICS[metricKey];
-  const anySimulated = metric.isRealValue && (!metric.isRealValue(run1) || !metric.isRealValue(run2));
+
+  if (
+    metricKey === 'accuracy' &&
+    (!metric.isRealValue(run1) || !metric.isRealValue(run2))
+  ) {
+    return (
+      <div className="chart-card">
+        <div className="chart-header">
+          <div className="chart-header-text">
+            <h3>Metric Comparison</h3>
+            <p className="chart-subtitle">
+              Accuracy is unavailable for one or both selected runs.
+            </p>
+          </div>
+          <div className="metric-toggle">
+            {Object.entries(METRICS).map(([key, m]) => (
+              <button
+                key={key}
+                className={`metric-toggle-btn ${metricKey === key ? 'active' : ''}`}
+                onClick={() => setMetricKey(key)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="chart-empty">No captured accuracy is available for this comparison.</p>
+      </div>
+    );
+  }
+
+  if (
+    metricKey === 'samples' &&
+    (!metric.isRealValue(run1) || !metric.isRealValue(run2))
+  ) {
+    return (
+      <div className="chart-card">
+        <div className="chart-header">
+          <div className="chart-header-text">
+            <h3>Metric Comparison</h3>
+            <p className="chart-subtitle">
+              Dataset size is unavailable for one or both selected runs.
+            </p>
+          </div>
+          <div className="metric-toggle">
+            {Object.entries(METRICS).map(([key, m]) => (
+              <button
+                key={key}
+                className={`metric-toggle-btn ${metricKey === key ? 'active' : ''}`}
+                onClick={() => setMetricKey(key)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className="chart-empty">No captured dataset size is available for this comparison.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="chart-card">
@@ -136,7 +206,7 @@ function ComparisonChart({ run1, run2 }) {
         <div className="chart-header-text">
           <h3>Metric Comparison</h3>
           <p className="chart-subtitle">
-            {anySimulated ? 'Accuracy simulated where not yet captured' : 'Pick a metric to compare the two selected runs'}
+            Pick a metric to compare the two selected runs
           </p>
         </div>
         <div className="metric-toggle">

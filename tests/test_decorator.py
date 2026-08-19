@@ -1,13 +1,15 @@
-
 import pytest
+import numpy as np
+import pandas as pd
+
 from sklearn.datasets import load_iris, load_wine
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.tree import DecisionTreeClassifier
 
-from experiment_tracker.decorator import track_run, infer_dataset_signature
+from experiment_tracker.decorator import get_dataset_hash, infer_dataset_signature, track_run
 from experiment_tracker.storage import Storage
 
 
@@ -22,12 +24,10 @@ def test_metrics_are_auto_computed_when_not_provided(tracked_storage):
     @track_run
     def train():
         iris = load_iris()
-        X_train, X_test, y_train, y_test = train_test_split(
-            iris.data, iris.target, test_size=0.2, random_state=42
-        )
+        X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)
         model = RandomForestClassifier(n_estimators=10, random_state=42)
         model.fit(X_train, y_train)
-        return model, X_test, y_test 
+        return model, X_test, y_test
 
     train()
     runs = tracked_storage.get_all_runs()
@@ -76,7 +76,9 @@ def test_bare_model_return_does_not_crash(tracked_storage):
 
     train()
     run = tracked_storage.get_all_runs()[0]
-    assert run["dataset_shape"] == (0, 0)
+    assert run["dataset_shape"] is None
+    assert run["dataset_hash"] is None
+    assert run["dataset_name"] is None
     assert run["metrics"] == {}
 
 
@@ -93,12 +95,12 @@ def test_run_ids_never_collide_across_rapid_calls(tracked_storage):
         train()
 
     runs = tracked_storage.get_all_runs()
-    run_ids = [r["run_id"] for r in runs]
+    run_ids = [run["run_id"] for run in runs]
     assert len(run_ids) == 10
-    assert len(set(run_ids)) == 10 
+    assert len(set(run_ids)) == 10
 
 
-def test_dataset_auto_detected_despite_scaling_differences(tracked_storage):
+def test_dataset_name_is_not_inferred_but_full_dataset_hash_is_stable(tracked_storage):
     @track_run
     def train_scaled():
         iris = load_iris()
@@ -120,11 +122,10 @@ def test_dataset_auto_detected_despite_scaling_differences(tracked_storage):
 
     train_scaled()
     train_unscaled()
-
     runs = tracked_storage.get_all_runs()
     assert len(runs) == 2
-    assert runs[0]["dataset_name"] == "iris"
-    assert runs[1]["dataset_name"] == "iris"
+    assert runs[0]["dataset_name"] is None
+    assert runs[1]["dataset_name"] is None
     assert runs[0]["dataset_hash"] == runs[1]["dataset_hash"]
 
 
@@ -147,11 +148,12 @@ def test_two_different_known_datasets_are_distinguished(tracked_storage):
 
     train_iris()
     train_wine()
+    runs = tracked_storage.get_all_runs()
+    assert all(run["dataset_name"] is None for run in runs)
+    assert runs[0]["dataset_hash"] != runs[1]["dataset_hash"]
 
-    names = {r["dataset_name"] for r in tracked_storage.get_all_runs()}
-    assert names == {"iris", "wine"}
 
-def test_explicit_dataset_name_overrides_auto_detection(tracked_storage):
+def test_explicit_dataset_name_is_respected(tracked_storage):
     @track_run
     def train():
         iris = load_iris()
@@ -163,28 +165,81 @@ def test_explicit_dataset_name_overrides_auto_detection(tracked_storage):
     train()
     assert tracked_storage.get_all_runs()[0]["dataset_name"] == "my_custom_iris_variant"
 
+
 def test_unknown_custom_dataset_gets_no_friendly_name_but_still_groups():
-    import numpy as np
     X = np.random.rand(50, 7)
-    y = np.random.rand(50) * 100  
+    y = np.random.rand(50) * 100
     hash1, name1 = infer_dataset_signature(X, y)
     hash2, name2 = infer_dataset_signature(X, y)
     assert name1 is None
-    assert hash1 == hash2 
+    assert name2 is None
+    assert hash1 == hash2
+
 
 def test_dataset_hash_is_full_sha256_and_changes_when_data_changes():
-    import numpy as np
-    from experiment_tracker.decorator import get_dataset_hash
-
     X = np.array([[1, 2], [3, 4]], dtype=np.int64)
     y = np.array([0, 1], dtype=np.int64)
-
     first = get_dataset_hash(X, y)
     second = get_dataset_hash(X.copy(), y.copy())
     changed = get_dataset_hash(X, np.array([1, 0], dtype=np.int64))
-
     assert len(first) == 64
     assert first == second
+    assert first != changed
+
+
+def test_dataset_hash_changes_when_shape_changes():
+    first = get_dataset_hash(np.array([[1, 2], [3, 4]], dtype=np.int64))
+    changed = get_dataset_hash(np.array([[1, 2, 3, 4]], dtype=np.int64))
+    assert first != changed
+
+
+def test_dataset_hash_changes_when_dtype_changes():
+    first = get_dataset_hash(np.array([1, 2, 3], dtype=np.int32))
+    changed = get_dataset_hash(np.array([1, 2, 3], dtype=np.int64))
+    assert first != changed
+
+
+def test_dataset_hash_distinguishes_object_array_values():
+    first = get_dataset_hash(np.array(["alpha", "beta"], dtype=object))
+    changed = get_dataset_hash(np.array(["alpha", "gamma"], dtype=object))
+    assert first != changed
+
+
+def test_dataset_hash_is_stable_for_object_arrays():
+    first = get_dataset_hash(np.array(["alpha", "beta"], dtype=object))
+    second = get_dataset_hash(np.array(["alpha", "beta"], dtype=object))
+    assert first == second
+
+
+def test_dataframe_hash_changes_when_values_change():
+    first = get_dataset_hash(pd.DataFrame({"a": [1, 2], "b": [3, 4]}))
+    changed = get_dataset_hash(pd.DataFrame({"a": [1, 2], "b": [3, 5]}))
+    assert first != changed
+
+
+def test_dataframe_hash_changes_when_columns_change():
+    first = get_dataset_hash(pd.DataFrame({"a": [1, 2], "b": [3, 4]}))
+    changed = get_dataset_hash(pd.DataFrame({"x": [1, 2], "b": [3, 4]}))
+    assert first != changed
+
+
+def test_dataframe_hash_is_stable_for_equivalent_dataframes():
+    first = get_dataset_hash(pd.DataFrame({"a": [1, 2], "b": [3, 4]}))
+    second = get_dataset_hash(pd.DataFrame({"a": [1, 2], "b": [3, 4]}))
+    assert first == second
+
+
+def test_dataset_hash_changes_when_target_changes():
+    X = np.array([[1, 2], [3, 4]], dtype=np.int64)
+    first = get_dataset_hash(X, np.array([0, 1], dtype=np.int64))
+    changed = get_dataset_hash(X, np.array([1, 1], dtype=np.int64))
+    assert first != changed
+
+
+def test_dataset_hash_changes_when_target_shape_changes():
+    X = np.array([[1, 2], [3, 4]], dtype=np.int64)
+    first = get_dataset_hash(X, np.array([0, 1], dtype=np.int64))
+    changed = get_dataset_hash(X, np.array([[0], [1]], dtype=np.int64))
     assert first != changed
 
 
@@ -192,9 +247,7 @@ def test_full_dataset_payload_controls_dataset_hash_and_shape(tracked_storage):
     @track_run
     def train():
         iris = load_iris()
-        X_train, X_test, y_train, y_test = train_test_split(
-            iris.data, iris.target, test_size=0.2, random_state=42
-        )
+        X_train, X_test, y_train, y_test = train_test_split(iris.data, iris.target, test_size=0.2, random_state=42)
         model = RandomForestClassifier(n_estimators=5, random_state=42)
         model.fit(X_train, y_train)
         return model, X_test, y_test, None, None, (iris.data, iris.target)

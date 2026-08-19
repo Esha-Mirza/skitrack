@@ -7,6 +7,7 @@ function RunDetailModal({ run, onClose }) {
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose();
     };
+
     window.addEventListener('keydown', handleKey);
 
     const previousOverflow = document.body.style.overflow;
@@ -48,13 +49,15 @@ function RunDetailModal({ run, onClose }) {
                 <span className="pill-label">Time</span>
               </div>
             </div>
+
             <div className="stat-pill">
               <Database size={14} />
               <div>
-                <span className="pill-value">{run.dataset_shape[0]}</span>
+                <span className="pill-value">{run.dataset_shape ? run.dataset_shape[0] : 'Not captured'}</span>
                 <span className="pill-label">Rows</span>
               </div>
             </div>
+
             <div className="stat-pill">
               <Hash size={14} />
               <div>
@@ -66,13 +69,16 @@ function RunDetailModal({ run, onClose }) {
 
           <div className="comparison-hash" style={{ marginBottom: 18 }}>
             <Fingerprint size={13} />
-            <span title={run.dataset_hash}>{run.dataset_hash}</span>
+            <span title={run.dataset_hash || 'Dataset not captured'}>
+              {run.dataset_hash || 'Not captured'}
+            </span>
           </div>
 
           <div className="modal-section-title">
             <Target size={12} style={{ verticalAlign: -1, marginRight: 5 }} />
             Metrics ({metricsEntries.length})
           </div>
+
           {metricsEntries.length > 0 ? (
             <div className="modal-params-list" style={{ maxHeight: 'none', marginBottom: 20 }}>
               {metricsEntries.map(([key, value]) => (
@@ -91,6 +97,7 @@ function RunDetailModal({ run, onClose }) {
           )}
 
           <div className="modal-section-title">Parameters ({Object.keys(run.params).length})</div>
+
           <div className="modal-params-list">
             {Object.entries(run.params).map(([key, value]) => (
               <div key={key} className="modal-param-row">

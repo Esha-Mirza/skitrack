@@ -1,4 +1,3 @@
-
 export function getAccuracyInfo(run) {
   const metrics = run?.metrics || {};
   const accuracy = metrics.accuracy;
@@ -34,6 +33,7 @@ export function getMetricInfo(run, metricName) {
 
 export function getFastestRun(runs) {
   if (!runs.length) return null;
+
   return runs.reduce(
     (fastest, run) =>
       run.training_time < fastest.training_time ? run : fastest,
@@ -43,6 +43,7 @@ export function getFastestRun(runs) {
 
 export function getMostParamsRun(runs) {
   if (!runs.length) return null;
+
   return runs.reduce(
     (most, run) =>
       Object.keys(run.params || {}).length > Object.keys(most.params || {}).length
@@ -54,6 +55,7 @@ export function getMostParamsRun(runs) {
 
 export function getBestAccuracyRun(runs) {
   const scoredRuns = runs.filter((run) => getAccuracyInfo(run).isReal);
+
   if (!scoredRuns.length) return null;
 
   return scoredRuns.reduce(
@@ -69,6 +71,7 @@ export function findSharedNumericParam(runs) {
   runs.forEach((run) => {
     Object.entries(run.params || {}).forEach(([key, value]) => {
       const num = typeof value === "number" ? value : parseFloat(value);
+
       if (!Number.isNaN(num) && Number.isFinite(num)) {
         counts[key] = (counts[key] || 0) + 1;
       }
@@ -86,6 +89,7 @@ export function findSharedNumericParam(runs) {
   });
 
   const threshold = Math.max(2, Math.ceil(runs.length * 0.4));
+
   return bestCount >= threshold ? bestKey : null;
 }
 
@@ -93,28 +97,35 @@ export function findDataConsistencyIssues(runs) {
   const map = {};
 
   runs.forEach((run) => {
-    if (!map[run.model_name]) map[run.model_name] = new Set();
+    if (!run.dataset_hash) return;
+
+    if (!map[run.model_name]) {
+      map[run.model_name] = new Set();
+    }
+
     map[run.model_name].add(run.dataset_hash);
   });
 
   return Object.entries(map)
     .filter(([, hashes]) => hashes.size > 1)
-    .map(([model, hashes]) => ({ model, hashCount: hashes.size }));
+    .map(([model, hashes]) => ({
+      model,
+      hashCount: hashes.size,
+    }));
 }
-
 
 export function buildDatasetLeaderboard(runs) {
   const groups = {};
 
-  runs.forEach((run) => {
-    const key = run.dataset_name || run.dataset_hash || "unknown";
+  runs.filter((run) => run.dataset_hash).forEach((run) => {
+    const key = run.dataset_name || run.dataset_hash;
 
     if (!groups[key]) {
       groups[key] = {
-        datasetHash: run.dataset_hash || "unknown",
+        datasetHash: run.dataset_hash,
         datasetName: run.dataset_name || null,
-        samples: run.dataset_shape?.[0] ?? 0,
-        features: run.dataset_shape?.[1] ?? 0,
+        samples: run.dataset_shape?.[0] ?? null,
+        features: run.dataset_shape?.[1] ?? null,
         runs: [],
       };
     }
@@ -135,12 +146,20 @@ export function buildDatasetLeaderboard(runs) {
 
       scoredRuns.forEach((run) => {
         const accuracy = getAccuracyInfo(run).value;
+
         const speedScore = Number(
-          (100 * fastestTime / Math.max(run.training_time, Number.EPSILON)).toFixed(1)
+          (
+            (100 * fastestTime) /
+            Math.max(run.training_time, Number.EPSILON)
+          ).toFixed(1)
         );
-        const composite = Number(((accuracy + speedScore) / 2).toFixed(1));
+
+        const composite = Number(
+          ((accuracy + speedScore) / 2).toFixed(1)
+        );
 
         const existing = bestByModel[run.model_name];
+
         if (!existing || composite > existing.composite) {
           bestByModel[run.model_name] = {
             modelName: run.model_name,
@@ -155,7 +174,10 @@ export function buildDatasetLeaderboard(runs) {
 
       const ranked = Object.values(bestByModel)
         .sort((a, b) => b.composite - a.composite)
-        .map((entry, index) => ({ ...entry, rank: index + 1 }));
+        .map((entry, index) => ({
+          ...entry,
+          rank: index + 1,
+        }));
 
       return {
         ...group,
@@ -166,13 +188,17 @@ export function buildDatasetLeaderboard(runs) {
     })
     .sort(
       (a, b) =>
-        b.ranked.length - a.ranked.length || b.samples - a.samples
+        b.ranked.length - a.ranked.length ||
+        (b.samples ?? -1) - (a.samples ?? -1)
     );
 }
 
 export function formatShortDate(timestamp) {
   const date = new Date(timestamp);
-  if (Number.isNaN(date.getTime())) return String(timestamp);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(timestamp);
+  }
 
   return date.toLocaleDateString(undefined, {
     month: "short",

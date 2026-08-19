@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 
 function DatasetSizeChart({ data }) {
-  const chartData = data.map(run => ({
+  const chartData = data.filter(run => run.dataset_shape).map(run => ({
     name: run.run_id.slice(-6),
     samples: run.dataset_shape[0],
     features: run.dataset_shape[1],
@@ -15,7 +15,7 @@ function DatasetSizeChart({ data }) {
     return (
       <div className="chart-card">
         <h3>Dataset Size</h3>
-        <p className="chart-empty">No data available</p>
+        <p className="chart-empty">No captured dataset size is available</p>
       </div>
     );
   }

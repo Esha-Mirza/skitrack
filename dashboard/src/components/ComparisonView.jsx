@@ -30,14 +30,14 @@ function RunSummaryCard({ run, accentClass }) {
         <div className="stat-pill">
           <Database size={14} />
           <div>
-            <span className="pill-value">{run.dataset_shape[0]}</span>
+            <span className="pill-value">{run.dataset_shape ? run.dataset_shape[0] : 'Not captured'}</span>
             <span className="pill-label">Rows</span>
           </div>
         </div>
         <div className="stat-pill">
           <Hash size={14} />
           <div>
-            <span className="pill-value">{Object.keys(run.params).length}</span>
+            <span className="pill-value">{Object.keys(run.params || {}).length}</span>
             <span className="pill-label">Params</span>
           </div>
         </div>
@@ -45,40 +45,58 @@ function RunSummaryCard({ run, accentClass }) {
 
       <div className="comparison-hash">
         <Fingerprint size={13} />
-        <span title={run.dataset_hash}>{run.dataset_hash}</span>
+        <span title={run.dataset_hash || 'Dataset not captured'}>{run.dataset_hash || 'Not captured'}</span>
       </div>
     </div>
   );
 }
 
 function ComparisonView({ run1, run2 }) {
-  // useMemo must run on every render, unconditionally — moving it above
-  // the early return (and guarding inside the callback) fixes a real
-  // React Hooks rule violation: hooks can't be called after a conditional
-  // return, or React loses track of hook order between renders.
   const radarData = useMemo(() => {
-    if (!run1 || !run2) return { rows: [], accuracyIsSimulated: false };
+    if (!run1 || !run2) return [];
 
     const minTime = Math.min(run1.training_time, run2.training_time) || 1;
-    const maxSamples = Math.max(run1.dataset_shape[0], run2.dataset_shape[0]) || 1;
-    const maxParams = Math.max(Object.keys(run1.params).length, Object.keys(run2.params).length) || 1;
+    const hasDatasetSizes = Boolean(run1.dataset_shape && run2.dataset_shape);
+    const maxSamples = hasDatasetSizes
+      ? Math.max(run1.dataset_shape[0], run2.dataset_shape[0]) || 1
+      : 1;
 
-    const speedScore = (run) => parseFloat((100 * minTime / run.training_time).toFixed(1));
-    const samplesScore = (run) => parseFloat((100 * run.dataset_shape[0] / maxSamples).toFixed(1));
-    const paramsScore = (run) => parseFloat((100 * Object.keys(run.params).length / maxParams).toFixed(1));
+    const maxParams = Math.max(
+      Object.keys(run1.params || {}).length,
+      Object.keys(run2.params || {}).length
+    ) || 1;
+
+    const speedScore = run =>
+      parseFloat((100 * minTime / run.training_time).toFixed(1));
+
+    const samplesScore = run =>
+      parseFloat((100 * run.dataset_shape[0] / maxSamples).toFixed(1));
+
+    const paramsScore = run =>
+      parseFloat(
+        (100 * Object.keys(run.params || {}).length / maxParams).toFixed(1)
+      );
+
+    const rows = [
+      { metric: 'Speed', run1: speedScore(run1), run2: speedScore(run2) },
+      ...(hasDatasetSizes
+        ? [{ metric: 'Data Size', run1: samplesScore(run1), run2: samplesScore(run2) }]
+        : []),
+      { metric: 'Params', run1: paramsScore(run1), run2: paramsScore(run2) },
+    ];
 
     const acc1 = getAccuracyInfo(run1);
     const acc2 = getAccuracyInfo(run2);
 
-    return {
-      rows: [
-        { metric: 'Speed', run1: speedScore(run1), run2: speedScore(run2) },
-        { metric: 'Accuracy', run1: acc1.value, run2: acc2.value },
-        { metric: 'Data Size', run1: samplesScore(run1), run2: samplesScore(run2) },
-        { metric: 'Params', run1: paramsScore(run1), run2: paramsScore(run2) },
-      ],
-      accuracyIsSimulated: !acc1.isReal || !acc2.isReal,
-    };
+    if (acc1.isReal && acc2.isReal) {
+      rows.splice(1, 0, {
+        metric: 'Accuracy',
+        run1: acc1.value,
+        run2: acc2.value,
+      });
+    }
+
+    return rows;
   }, [run1, run2]);
 
   if (!run1 || !run2) {
@@ -91,11 +109,17 @@ function ComparisonView({ run1, run2 }) {
   }
 
   const allParams = Array.from(new Set([
-    ...Object.keys(run1.params),
-    ...Object.keys(run2.params)
+    ...Object.keys(run1.params || {}),
+    ...Object.keys(run2.params || {})
   ]));
 
-  const differentCount = allParams.filter(key => run1.params[key] !== run2.params[key]).length;
+  const differentCount = allParams.filter(
+    key => run1.params[key] !== run2.params[key]
+  ).length;
+
+  const bothHaveAccuracy =
+    getAccuracyInfo(run1).isReal &&
+    getAccuracyInfo(run2).isReal;
 
   return (
     <div className="comparison-view">
@@ -111,12 +135,12 @@ function ComparisonView({ run1, run2 }) {
         <div className="chart-header-text">
           <h3>Multi-Metric Overview</h3>
           <p className="chart-subtitle">
-            Speed, accuracy, data size, and parameter count — normalized to 0–100
-            {radarData.accuracyIsSimulated ? ' (accuracy simulated where not yet captured)' : ''}
+            Speed, data size, and parameter count — normalized to 0–100
+            {bothHaveAccuracy ? ', with captured accuracy' : ''}
           </p>
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <RadarChart data={radarData.rows} outerRadius="72%">
+          <RadarChart data={radarData} outerRadius="72%">
             <PolarGrid stroke="var(--border-color)" />
             <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12, fill: 'var(--text-secondary)' }} />
             <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} />
@@ -146,8 +170,12 @@ function ComparisonView({ run1, run2 }) {
             const val1 = run1.params[key];
             const val2 = run2.params[key];
             const isDifferent = val1 !== val2;
+
             return (
-              <div key={key} className={`differences-row ${isDifferent ? 'is-different' : 'is-same'}`}>
+              <div
+                key={key}
+                className={`differences-row ${isDifferent ? 'is-different' : 'is-same'}`}
+              >
                 <span className="diff-key">{key}</span>
                 <span className="diff-val">{String(val1 ?? '—')}</span>
                 <span className="diff-val">{String(val2 ?? '—')}</span>

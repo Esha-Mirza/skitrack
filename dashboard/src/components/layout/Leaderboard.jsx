@@ -1,5 +1,10 @@
 import { Zap, Trophy, Layers3, Eye, Sparkles } from 'lucide-react';
-import { getFastestRun, getBestAccuracyRun, getMostParamsRun, getAccuracyInfo } from '../../utils/metrics';
+import {
+  getFastestRun,
+  getBestAccuracyRun,
+  getMostParamsRun,
+  getAccuracyInfo
+} from '../../utils/metrics';
 
 function Leaderboard({ runs, onViewRun }) {
   if (!runs.length) {
@@ -22,15 +27,15 @@ function Leaderboard({ runs, onViewRun }) {
       icon: Zap,
       label: 'Fastest Run',
       run: fastest,
-      metric: `${fastest.training_time.toFixed(3)}s`,
+      metric: fastest ? `${fastest.training_time.toFixed(3)}s` : 'N/A',
       color: '#e01e2b',
     },
     {
       id: 'accuracy',
       icon: Trophy,
-      label: accuracyInfo.isReal ? 'Best Accuracy' : 'Best Accuracy (simulated)',
+      label: 'Best Accuracy',
       run: bestAccuracy,
-      metric: `${accuracyInfo.value}%`,
+      metric: accuracyInfo.isReal ? `${accuracyInfo.value}%` : 'N/A',
       color: '#ff5b63',
     },
     {
@@ -38,7 +43,9 @@ function Leaderboard({ runs, onViewRun }) {
       icon: Layers3,
       label: 'Most Parameters',
       run: mostParams,
-      metric: `${Object.keys(mostParams.params).length} params`,
+      metric: mostParams
+        ? `${Object.keys(mostParams.params || {}).length} params`
+        : 'N/A',
       color: '#a3121f',
     },
   ];
@@ -47,19 +54,40 @@ function Leaderboard({ runs, onViewRun }) {
     <div className="leaderboard-grid">
       {cards.map((card, index) => {
         const Icon = card.icon;
+
         return (
-          <div key={card.id} className="leaderboard-card" style={{ animationDelay: `${index * 0.05}s` }}>
-            <div className="leaderboard-card-icon" style={{ background: `${card.color}20`, color: card.color }}>
+          <div
+            key={card.id}
+            className="leaderboard-card"
+            style={{ animationDelay: `${index * 0.05}s` }}
+          >
+            <div
+              className="leaderboard-card-icon"
+              style={{
+                background: `${card.color}20`,
+                color: card.color
+              }}
+            >
               <Icon size={18} />
             </div>
             <div className="leaderboard-card-body">
               <span className="leaderboard-label">{card.label}</span>
               <span className="leaderboard-metric">{card.metric}</span>
-              <span className="leaderboard-run-id">{card.run.run_id} · {card.run.model_name}</span>
+              {card.run && (
+                <span className="leaderboard-run-id">
+                  {card.run.run_id} · {card.run.model_name}
+                </span>
+              )}
             </div>
-            <button className="leaderboard-view-btn" onClick={() => onViewRun(card.run)} title="View run">
-              <Eye size={15} />
-            </button>
+            {card.run && (
+              <button
+                className="leaderboard-view-btn"
+                onClick={() => onViewRun(card.run)}
+                title="View run"
+              >
+                <Eye size={15} />
+              </button>
+            )}
           </div>
         );
       })}
