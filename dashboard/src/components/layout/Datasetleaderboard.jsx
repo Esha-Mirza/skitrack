@@ -1,11 +1,25 @@
 import { useState } from 'react';
 import { Trophy, Medal, Award, Database, Eye, ListChecks, Zap, Target } from 'lucide-react';
-import { buildDatasetLeaderboard } from '../../utils/metrics';
+import { buildDatasetLeaderboard, formatTrainingTime } from '../../utils/metrics';
 
 const RANK_ICONS = [Trophy, Medal, Award];
 const RANK_COLORS = ['#ffc107', '#c0c0c0', '#cd7f32'];
 
-function DatasetLeaderboard({ runs, onViewRun }) {
+function formatShape(samples, features) {
+  const parts = [];
+
+  if (samples !== null && samples !== undefined) {
+    parts.push(`${samples} samples`);
+  }
+
+  if (features !== null && features !== undefined) {
+    parts.push(`${features} features`);
+  }
+
+  return parts;
+}
+
+function DatasetLeaderboard({ runs = [], onViewRun }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   if (!runs.length) {
@@ -23,13 +37,18 @@ function DatasetLeaderboard({ runs, onViewRun }) {
     return (
       <div className="dataset-leaderboard-empty">
         <ListChecks size={28} />
-        <p>No experiments with comparable accuracy metrics are available yet.</p>
+        <p>No experiments have a dataset fingerprint yet, so there is nothing to rank per dataset.</p>
       </div>
     );
   }
 
   const activeIndex = Math.min(selectedIndex, groups.length - 1);
   const group = groups[activeIndex];
+
+  const headerParts = formatShape(group.samples, group.features);
+  headerParts.push(
+    `${group.ranked.length} model${group.ranked.length !== 1 ? 's' : ''} compared`
+  );
 
   return (
     <div className="dataset-leaderboard">
@@ -40,21 +59,25 @@ function DatasetLeaderboard({ runs, onViewRun }) {
             Model Leaderboard by Dataset
           </h2>
           <p className="chart-subtitle">
-            Ranked by speed and accuracy, per dataset - only runs with captured accuracy are ranked
+            Ranked per dataset on the score each run captured, with training speed as the tie-breaker
           </p>
         </div>
         {groups.length > 1 && (
           <div className="metric-toggle">
-            {groups.map((g, i) => (
-              <button
-                key={g.datasetHash}
-                className={'metric-toggle-btn' + (i === activeIndex ? ' active' : '')}
-                onClick={() => setSelectedIndex(i)}
-                title={g.datasetHash}
-              >
-                {(g.datasetName || `Dataset ${i + 1}`) + ' - ' + g.samples + ' rows'}
-              </button>
-            ))}
+            {groups.map((g, i) => {
+              const rowLabel = g.samples === null ? '' : ` - ${g.samples} rows`;
+
+              return (
+                <button
+                  key={g.datasetHash}
+                  className={'metric-toggle-btn' + (i === activeIndex ? ' active' : '')}
+                  onClick={() => setSelectedIndex(i)}
+                  title={g.datasetHash}
+                >
+                  {(g.datasetName || `Dataset ${i + 1}`) + rowLabel}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -66,7 +89,7 @@ function DatasetLeaderboard({ runs, onViewRun }) {
               {group.datasetName || group.datasetHash}
             </span>
             <span className="dataset-group-meta">
-              {group.samples} samples - {group.features} features - {group.ranked.length} model{group.ranked.length !== 1 ? 's' : ''} compared
+              {headerParts.join(' - ')}
             </span>
           </div>
           {group.ranked.length > 0 && (
@@ -82,7 +105,7 @@ function DatasetLeaderboard({ runs, onViewRun }) {
             <div className="dataset-rank-row dataset-rank-header">
               <span></span>
               <span>Model</span>
-              <span><Target size={11} style={{ verticalAlign: -1 }} /> Accuracy</span>
+              <span><Target size={11} style={{ verticalAlign: -1 }} /> {group.metricLabel}</span>
               <span><Zap size={11} style={{ verticalAlign: -1 }} /> Speed</span>
               <span>Score</span>
               <span></span>
@@ -104,10 +127,10 @@ function DatasetLeaderboard({ runs, onViewRun }) {
                     <span className="dataset-rank-run">{entry.run.run_id}</span>
                   </div>
                   <span className="dataset-rank-stat">
-                    {entry.accuracyValue}%
+                    {entry.scoreValue}%
                   </span>
                   <span className="dataset-rank-stat">
-                    {entry.run.training_time.toFixed(3)}s
+                    {formatTrainingTime(entry.run)}
                   </span>
                   <div className="dataset-rank-score">
                     <div className="dataset-rank-bar-wrap">
@@ -131,8 +154,15 @@ function DatasetLeaderboard({ runs, onViewRun }) {
           </div>
         ) : (
           <div className="dataset-leaderboard-empty">
-            <p>No captured accuracy metrics are available for this dataset.</p>
+            <p>None of the runs on this dataset captured a score metric, so there is nothing to rank.</p>
           </div>
+        )}
+
+        {group.unscoredRunCount > 0 && group.ranked.length > 0 && (
+          <p className="dataset-group-footnote">
+            {group.unscoredRunCount} run{group.unscoredRunCount !== 1 ? 's' : ''} on this dataset
+            {group.unscoredRunCount !== 1 ? ' were' : ' was'} left out: no comparable {group.metricLabel} metric was captured.
+          </p>
         )}
       </div>
     </div>

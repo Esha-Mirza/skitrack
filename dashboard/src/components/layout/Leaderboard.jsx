@@ -1,12 +1,13 @@
 import { Zap, Trophy, Layers3, Eye, Sparkles } from 'lucide-react';
 import {
   getFastestRun,
-  getBestAccuracyRun,
+  getBestScoreRun,
   getMostParamsRun,
-  getAccuracyInfo
+  getScoreInfo,
+  formatTrainingTime
 } from '../../utils/metrics';
 
-function Leaderboard({ runs, onViewRun }) {
+function Leaderboard({ runs = [], onViewRun }) {
   if (!runs.length) {
     return (
       <div className="leaderboard-empty">
@@ -17,9 +18,9 @@ function Leaderboard({ runs, onViewRun }) {
   }
 
   const fastest = getFastestRun(runs);
-  const bestAccuracy = getBestAccuracyRun(runs);
+  const bestScore = getBestScoreRun(runs);
   const mostParams = getMostParamsRun(runs);
-  const accuracyInfo = getAccuracyInfo(bestAccuracy);
+  const scoreInfo = getScoreInfo(bestScore);
 
   const cards = [
     {
@@ -27,15 +28,17 @@ function Leaderboard({ runs, onViewRun }) {
       icon: Zap,
       label: 'Fastest Run',
       run: fastest,
-      metric: fastest ? `${fastest.training_time.toFixed(3)}s` : 'N/A',
+      metric: formatTrainingTime(fastest),
       color: '#e01e2b',
     },
     {
-      id: 'accuracy',
+      id: 'score',
       icon: Trophy,
-      label: 'Best Accuracy',
-      run: bestAccuracy,
-      metric: accuracyInfo.isReal ? `${accuracyInfo.value}%` : 'N/A',
+      // Classifiers report accuracy and regressors report R2, so the card
+      // names whichever metric the winning run actually captured.
+      label: scoreInfo.isReal ? `Best ${scoreInfo.label}` : 'Best Score',
+      run: bestScore,
+      metric: scoreInfo.isReal ? `${scoreInfo.value}%` : 'N/A',
       color: '#ff5b63',
     },
     {
