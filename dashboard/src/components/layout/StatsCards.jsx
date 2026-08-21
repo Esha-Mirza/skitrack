@@ -6,31 +6,44 @@ import {
   Calendar,
   Award
 } from 'lucide-react';
-import { getAccuracyInfo, getBestAccuracyRun } from '../../utils/metrics';
+import {
+  getAccuracyInfo,
+  getBestAccuracyRun,
+  getHyperparameterCount
+} from '../../utils/metrics';
 
 function StatsCards({ runs }) {
   const totalRuns = runs.length;
-  const uniqueModels = [...new Set(runs.map(r => r.model_name))];
+  const uniqueModels = [
+    ...new Set(runs.map(r => r.model_name))
+  ];
+
+  const totalHyperparameters = runs.reduce(
+    (sum, run) =>
+      sum + getHyperparameterCount(run),
+    0
+  );
 
   const avgTime = runs.length
-    ? runs.reduce((sum, r) => sum + r.training_time, 0) / runs.length
-    : 0;
-
-  const totalParams = runs.length
-    ? runs.reduce((sum, r) => sum + Object.keys(r.params || {}).length, 0)
+    ? runs.reduce(
+        (sum, r) => sum + r.training_time,
+        0
+      ) / runs.length
     : 0;
 
   const today = new Date().toDateString();
+
   const runsToday = runs.filter(
-    r => new Date(r.timestamp).toDateString() === today
+    r =>
+      new Date(r.timestamp).toDateString() ===
+      today
   ).length;
 
-  const bestAccuracyRun = getBestAccuracyRun(runs);
-  const bestAccuracyInfo = getAccuracyInfo(bestAccuracyRun);
+  const bestAccuracyRun =
+    getBestAccuracyRun(runs);
 
-  const bestAccuracyLabel = bestAccuracyInfo.isReal
-    ? `${bestAccuracyInfo.value}%`
-    : 'N/A';
+  const bestAccuracyInfo =
+    getAccuracyInfo(bestAccuracyRun);
 
   const cards = [
     {
@@ -52,8 +65,8 @@ function StatsCards({ runs }) {
       color: '#a3121f',
     },
     {
-      label: 'Total Parameters',
-      value: totalParams,
+      label: 'Hyperparameter Entries',
+      value: totalHyperparameters,
       icon: Hash,
       color: '#ff8a8f',
     },
@@ -65,7 +78,9 @@ function StatsCards({ runs }) {
     },
     {
       label: 'Best Accuracy',
-      value: bestAccuracyLabel,
+      value: bestAccuracyInfo.isReal
+        ? `${bestAccuracyInfo.value}%`
+        : 'N/A',
       icon: Award,
       color: '#ff3b47',
     },
@@ -77,7 +92,10 @@ function StatsCards({ runs }) {
         const Icon = card.icon;
 
         return (
-          <div key={index} className="stat-card">
+          <div
+            key={index}
+            className="stat-card"
+          >
             <div className="stat-card-header">
               <div
                 className="stat-icon"
@@ -89,8 +107,14 @@ function StatsCards({ runs }) {
                 <Icon size={20} />
               </div>
             </div>
-            <div className="stat-value">{card.value}</div>
-            <div className="stat-label">{card.label}</div>
+
+            <div className="stat-value">
+              {card.value}
+            </div>
+
+            <div className="stat-label">
+              {card.label}
+            </div>
           </div>
         );
       })}

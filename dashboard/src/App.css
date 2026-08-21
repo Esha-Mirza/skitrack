@@ -2629,3 +2629,214 @@ button:active {
     break-inside: avoid;
   }
 }
+
+/* Dataset leaderboard refinements */
+.dataset-leaderboard {
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px 22px;
+  overflow: hidden;
+}
+
+.dataset-leaderboard-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dataset-leaderboard-heading h2 {
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dataset-tabs {
+  justify-content: flex-end;
+  max-width: 62%;
+}
+
+.dataset-group-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 18px 0 0;
+  margin: 0;
+  animation: none;
+}
+
+.dataset-group-header {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.dataset-group-details {
+  min-width: 0;
+}
+
+.dataset-group-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.dataset-group-hash {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  overflow-wrap: anywhere;
+}
+
+.dataset-hash-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  min-width: 0;
+}
+
+.dataset-hash-line > span {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.dataset-rank-row {
+  display: grid;
+  grid-template-columns: 28px minmax(220px, 1fr) 90px 110px 70px 50px 42px;
+  align-items: center;
+  gap: 12px;
+}
+
+.dataset-rank-header span {
+  text-align: center;
+}
+
+.dataset-rank-header span:nth-child(2) {
+  text-align: left;
+}
+
+.dataset-rank-info {
+  min-width: 0;
+  padding: 3px 0;
+}
+
+.dataset-rank-model {
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.dataset-rank-run {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.dataset-rank-stat {
+  text-align: center;
+}
+
+.leaderboard-view-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+}
+
+.dataset-group-footnote {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.settings-toggle:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.settings-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .dataset-leaderboard-heading {
+    flex-direction: column;
+  }
+
+  .dataset-tabs {
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+
+  .dataset-group-card {
+    overflow-x: auto;
+  }
+
+  .dataset-rank-list {
+    min-width: 760px;
+  }
+}
+
+/* ============================================
+   COMPARISON-ONLY UI FIXES
+   ============================================ */
+
+/* Keep the comparison sections visually separated. */
+.comparison-view > .chart-card {
+  margin-bottom: 24px;
+}
+
+.comparison-view > .comparison-differences {
+  margin-top: 24px;
+}
+
+/* Radar / diamond comparison graph. */
+.comparison-radar-chart {
+  width: 100%;
+  height: 300px;
+}
+
+.comparison-radar-chart .recharts-polar-grid-concentric-path,
+.comparison-radar-chart .recharts-polar-grid-angle line {
+  stroke: var(--border-color);
+}
+
+.comparison-radar-chart .recharts-polar-angle-axis-tick-value {
+  fill: var(--text-secondary);
+  font-size: 11px;
+}
+
+.comparison-radar-chart .recharts-polar-radius-axis-tick-value {
+  fill: var(--text-muted);
+  font-size: 10px;
+}
+
+/* Captured Values hover follows the active theme in both modes. */
+.comparison-captured-values {
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.comparison-captured-values:hover {
+  box-shadow: var(--shadow-hover);
+  border-color: var(--accent-light);
+}

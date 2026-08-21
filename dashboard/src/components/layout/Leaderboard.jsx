@@ -1,9 +1,17 @@
-import { Zap, Trophy, Layers3, Eye, Sparkles } from 'lucide-react';
+import {
+  Zap,
+  Trophy,
+  Layers3,
+  Eye,
+  Sparkles
+} from 'lucide-react';
+
 import {
   getFastestRun,
   getBestAccuracyRun,
-  getMostParamsRun,
-  getAccuracyInfo
+  getMostHyperparametersRun,
+  getAccuracyInfo,
+  getHyperparameterCount
 } from '../../utils/metrics';
 
 function Leaderboard({ runs, onViewRun }) {
@@ -11,15 +19,22 @@ function Leaderboard({ runs, onViewRun }) {
     return (
       <div className="leaderboard-empty">
         <Sparkles size={20} />
-        <p>Quick highlights will show up here once you&apos;ve tracked a few experiments</p>
+        <p>
+          Quick highlights will show up here once
+          you&apos;ve tracked a few experiments
+        </p>
       </div>
     );
   }
 
   const fastest = getFastestRun(runs);
-  const bestAccuracy = getBestAccuracyRun(runs);
-  const mostParams = getMostParamsRun(runs);
-  const accuracyInfo = getAccuracyInfo(bestAccuracy);
+  const bestAccuracy =
+    getBestAccuracyRun(runs);
+  const mostHyperparameters =
+    getMostHyperparametersRun(runs);
+
+  const accuracyInfo =
+    getAccuracyInfo(bestAccuracy);
 
   const cards = [
     {
@@ -27,7 +42,9 @@ function Leaderboard({ runs, onViewRun }) {
       icon: Zap,
       label: 'Fastest Run',
       run: fastest,
-      metric: fastest ? `${fastest.training_time.toFixed(3)}s` : 'N/A',
+      metric: fastest
+        ? `${fastest.training_time.toFixed(3)}s`
+        : 'N/A',
       color: '#e01e2b',
     },
     {
@@ -35,16 +52,20 @@ function Leaderboard({ runs, onViewRun }) {
       icon: Trophy,
       label: 'Best Accuracy',
       run: bestAccuracy,
-      metric: accuracyInfo.isReal ? `${accuracyInfo.value}%` : 'N/A',
+      metric: accuracyInfo.isReal
+        ? `${accuracyInfo.value}%`
+        : 'N/A',
       color: '#ff5b63',
     },
     {
-      id: 'params',
+      id: 'hyperparameters',
       icon: Layers3,
-      label: 'Most Parameters',
-      run: mostParams,
-      metric: mostParams
-        ? `${Object.keys(mostParams.params || {}).length} params`
+      label: 'Most Hyperparameters',
+      run: mostHyperparameters,
+      metric: mostHyperparameters
+        ? `${getHyperparameterCount(
+            mostHyperparameters
+          )} entries`
         : 'N/A',
       color: '#a3121f',
     },
@@ -59,30 +80,45 @@ function Leaderboard({ runs, onViewRun }) {
           <div
             key={card.id}
             className="leaderboard-card"
-            style={{ animationDelay: `${index * 0.05}s` }}
+            style={{
+              animationDelay:
+                `${index * 0.05}s`
+            }}
           >
             <div
               className="leaderboard-card-icon"
               style={{
-                background: `${card.color}20`,
+                background:
+                  `${card.color}20`,
                 color: card.color
               }}
             >
               <Icon size={18} />
             </div>
+
             <div className="leaderboard-card-body">
-              <span className="leaderboard-label">{card.label}</span>
-              <span className="leaderboard-metric">{card.metric}</span>
+              <span className="leaderboard-label">
+                {card.label}
+              </span>
+
+              <span className="leaderboard-metric">
+                {card.metric}
+              </span>
+
               {card.run && (
                 <span className="leaderboard-run-id">
-                  {card.run.run_id} · {card.run.model_name}
+                  {card.run.run_id} ·{' '}
+                  {card.run.model_name}
                 </span>
               )}
             </div>
+
             {card.run && (
               <button
                 className="leaderboard-view-btn"
-                onClick={() => onViewRun(card.run)}
+                onClick={() =>
+                  onViewRun(card.run)
+                }
                 title="View run"
               >
                 <Eye size={15} />

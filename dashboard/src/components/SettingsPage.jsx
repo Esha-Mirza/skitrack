@@ -1,8 +1,33 @@
 import { Moon, Sun, Bell, Database, Info } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useState } from 'react';
 
 function SettingsPage() {
   const { isDark, toggleTheme } = useDarkMode();
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('experiment-tracker-notifications') !== 'off';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleNotifications = () => {
+    setNotificationsEnabled((enabled) => {
+      const next = !enabled;
+      try {
+        localStorage.setItem('experiment-tracker-notifications', next ? 'on' : 'off');
+      } catch {
+        // Keep the preference for this session if storage is unavailable.
+      }
+      window.dispatchEvent(
+        new CustomEvent('experiment-tracker-notifications-change', {
+          detail: { enabled: next },
+        })
+      );
+      return next;
+    });
+  };
 
   return (
     <div className="settings-page">
@@ -18,17 +43,25 @@ function SettingsPage() {
             <span>Switch between light and dark theme</span>
           </div>
           <button
+            type="button"
             className={`settings-toggle ${isDark ? 'on' : ''}`}
             onClick={toggleTheme}
             aria-label="Toggle dark mode"
+            aria-pressed={isDark}
           />
         </div>
         <div className="settings-row">
           <div className="settings-row-text">
             <strong><Bell size={14} style={{ verticalAlign: -2, marginRight: 6 }} />Notifications</strong>
-            <span>Get notified when a new run finishes tracking</span>
+            <span>Show dashboard notifications when actions complete</span>
           </div>
-          <button className="settings-toggle on" aria-label="Toggle notifications" disabled />
+          <button
+            type="button"
+            className={`settings-toggle ${notificationsEnabled ? 'on' : ''}`}
+            onClick={toggleNotifications}
+            aria-label="Toggle notifications"
+            aria-pressed={notificationsEnabled}
+          />
         </div>
       </div>
 

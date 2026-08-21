@@ -16,7 +16,7 @@ function HelpPage() {
     {
       icon: PlayCircle,
       title: 'Track Your First Experiment',
-      description: 'Add the @track_run decorator to any scikit-learn model training function',
+      description: 'Add the @track_run decorator to your model training function. The tracker works with scikit-learn models and datasets from any source.',
       code: `from experiment_tracker import track_run
 
 @track_run
@@ -24,6 +24,12 @@ def train_model():
     model = RandomForestClassifier()
     model.fit(X_train, y_train)
     return model, X_test, y_test`
+    },
+    {
+      icon: Rocket,
+      title: 'Launch the Dashboard',
+      description: 'The dashboard is bundled with the Python package, so no Node.js, npm, or Vite setup is required.',
+      code: 'tracker dashboard\nOpen http://127.0.0.1:5000',
     },
     {
       icon: Layers,
@@ -55,7 +61,7 @@ def train_model():
     <div className="help-page">
       <div className="help-header">
         <h1>Getting Started</h1>
-        <p className="help-subtitle">Learn how to use Experiment Tracker in 5 simple steps</p>
+        <p className="help-subtitle">Track, analyze, compare, and export experiments from one local-first Python package.</p>
       </div>
 
       <div className="help-steps">
@@ -87,7 +93,7 @@ def train_model():
         </div>
         <div className="help-tip">
           <Rocket size={20} />
-          <span>Pro: View the dashboard at <strong>http://localhost:5173</strong></span>
+          <span>Dashboard: Run <strong>tracker dashboard</strong> to launch the bundled local dashboard at <strong>http://127.0.0.1:5000</strong></span>
         </div>
         <div className="help-tip">
           <Zap size={20} />

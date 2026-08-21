@@ -5,8 +5,8 @@ setup(
     version="0.1.0",
     description="Lightweight ML experiment tracking with local storage",
     author="Esha-Mirza",
-    packages=find_packages(),
-    include_package_data=True,
+    packages=find_packages(exclude=["experiment_tracker.static", "experiment_tracker.static.*"]),
+    include_package_data=False,
     package_data={
         "experiment_tracker": [
             "static/*",

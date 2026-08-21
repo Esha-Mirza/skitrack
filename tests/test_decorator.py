@@ -20,6 +20,25 @@ def tracked_storage(tmp_path, monkeypatch):
     return Storage(db_path=db_path)
 
 
+def test_simple_return_automatically_captures_full_dataset(tracked_storage):
+    @track_run
+    def train():
+        iris = load_iris()
+        X, y = iris.data, iris.target
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
+        model = RandomForestClassifier(n_estimators=5, random_state=42)
+        model.fit(X_train, y_train)
+        return model, X_test, y_test
+
+    train()
+    run = tracked_storage.get_all_runs()[0]
+    assert run["dataset_name"] == "Dataset 1"
+    assert run["dataset_shape"] == (150, 4)
+    assert len(run["dataset_hash"]) == 64
+
+
 def test_metrics_are_auto_computed_when_not_provided(tracked_storage):
     @track_run
     def train():
@@ -100,7 +119,7 @@ def test_run_ids_never_collide_across_rapid_calls(tracked_storage):
     assert len(set(run_ids)) == 10
 
 
-def test_dataset_name_is_not_inferred_but_full_dataset_hash_is_stable(tracked_storage):
+def test_dataset_name_is_automatically_inferred_and_full_dataset_hash_is_stable(tracked_storage):
     @track_run
     def train_scaled():
         iris = load_iris()
@@ -124,8 +143,8 @@ def test_dataset_name_is_not_inferred_but_full_dataset_hash_is_stable(tracked_st
     train_unscaled()
     runs = tracked_storage.get_all_runs()
     assert len(runs) == 2
-    assert runs[0]["dataset_name"] is None
-    assert runs[1]["dataset_name"] is None
+    assert runs[0]["dataset_name"] == "Dataset 1"
+    assert runs[1]["dataset_name"] == "Dataset 1"
     assert runs[0]["dataset_hash"] == runs[1]["dataset_hash"]
 
 
@@ -149,8 +168,8 @@ def test_two_different_known_datasets_are_distinguished(tracked_storage):
     train_iris()
     train_wine()
     runs = tracked_storage.get_all_runs()
-    assert all(run["dataset_name"] is None for run in runs)
     assert runs[0]["dataset_hash"] != runs[1]["dataset_hash"]
+    assert {run["dataset_name"] for run in runs} == {"Dataset 1", "Dataset 2"}
 
 
 def test_explicit_dataset_name_is_respected(tracked_storage):

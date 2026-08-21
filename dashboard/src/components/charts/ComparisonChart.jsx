@@ -1,229 +1,149 @@
-import { useState, useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell,
-  ResponsiveContainer, RadialBarChart, RadialBar, PolarAngleAxis
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from 'recharts';
-import { getAccuracyInfo } from '../../utils/metrics';
 
-const METRICS = {
-  time: {
-    label: 'Training Time',
-    unit: 's',
-    chartType: 'bar',
-    getValue: run => parseFloat(run.training_time.toFixed(3)),
-  },
-  params: {
-    label: 'Parameters',
-    unit: '',
-    chartType: 'bar',
-    getValue: run => Object.keys(run.params).length,
-  },
-  samples: {
-    label: 'Samples',
-    unit: '',
-    chartType: 'bar',
-    getValue: run => run.dataset_shape ? run.dataset_shape[0] : null,
-    isRealValue: run => Boolean(run.dataset_shape),
-  },
-  accuracy: {
-    label: 'Accuracy',
-    unit: '%',
-    chartType: 'radial',
-    getValue: run => getAccuracyInfo(run).value,
-    isRealValue: run => getAccuracyInfo(run).isReal,
-  },
-};
+import {
+  getAccuracyInfo,
+  getHyperparameterCount
+} from '../../utils/metrics';
 
-function BarComparison({ chartData, metric }) {
-  return (
-    <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-        <XAxis dataKey="name" stroke="var(--text-muted)" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickLine={false} axisLine={false} />
-        <YAxis
-          stroke="var(--text-muted)"
-          tick={{ fontSize: 11, fill: 'var(--text-muted)' }}
-          tickLine={false}
-          axisLine={false}
-          width={40}
-        />
-        <Tooltip
-          contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
-          labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
-          itemStyle={{ color: 'var(--text-secondary)' }}
-          cursor={{ fill: 'var(--accent-light)' }}
-          formatter={value => [`${value}${metric.unit}`, metric.label]}
-        />
-        <Bar dataKey="value" name={metric.label} radius={[6, 6, 0, 0]} maxBarSize={60}>
-          <Cell fill="var(--accent)" />
-          <Cell fill="#6e5a5c" />
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
+function ComparisonChart({ run1, run2 }) {
+  const accuracy1 =
+    getAccuracyInfo(run1);
 
-function RadialComparison({ chartData }) {
-  const radialData = [
-    { name: chartData[0].name, value: chartData[0].value, fill: 'var(--accent)' },
-    { name: chartData[1].name, value: chartData[1].value, fill: '#6e5a5c' },
+  const accuracy2 =
+    getAccuracyInfo(run2);
+
+  const data = [
+    {
+      metric: 'Training Time (s)',
+      run1: run1.training_time,
+      run2: run2.training_time,
+    },
+    {
+      metric: 'Hyperparameters',
+      run1: getHyperparameterCount(run1),
+      run2: getHyperparameterCount(run2),
+    },
+    ...(run1.dataset_shape?.[0] != null &&
+    run2.dataset_shape?.[0] != null
+      ? [
+          {
+            metric: 'Rows',
+            run1: run1.dataset_shape[0],
+            run2: run2.dataset_shape[0],
+          },
+        ]
+      : []),
+    ...(accuracy1.isReal &&
+    accuracy2.isReal
+      ? [
+          {
+            metric: 'Accuracy (%)',
+            run1: accuracy1.value,
+            run2: accuracy2.value,
+          },
+        ]
+      : []),
   ];
 
   return (
-    <div className="radial-comparison">
-      <ResponsiveContainer width="100%" height={260}>
-        <RadialBarChart
-          innerRadius="35%"
-          outerRadius="90%"
-          data={radialData}
-          startAngle={90}
-          endAngle={-270}
-          barGap={4}
-        >
-          <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-          <RadialBar dataKey="value" background={{ fill: 'var(--bg-hover)' }} cornerRadius={8}>
-            {radialData.map((entry, i) => (
-              <Cell key={i} fill={entry.fill} />
-            ))}
-          </RadialBar>
-          <Tooltip
-            contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
-            labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
-            itemStyle={{ color: 'var(--text-secondary)' }}
-            formatter={value => [`${value}%`, 'Accuracy']}
-          />
-        </RadialBarChart>
-      </ResponsiveContainer>
-      <div className="radial-legend">
-        {radialData.map((entry, i) => (
-          <div key={i} className="radial-legend-item">
-            <span className="radial-legend-dot" style={{ background: entry.fill }} />
-            <span className="radial-legend-name">{entry.name}</span>
-            <span className="radial-legend-value">{entry.value}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ComparisonChart({ run1, run2 }) {
-  const [metricKey, setMetricKey] = useState('time');
-
-  const chartData = useMemo(() => {
-    if (!run1 || !run2) return [];
-
-    const metric = METRICS[metricKey];
-
-    return [
-      {
-        name: run1.run_id.slice(-6),
-        model: run1.model_name,
-        value: metric.getValue(run1),
-      },
-      {
-        name: run2.run_id.slice(-6),
-        model: run2.model_name,
-        value: metric.getValue(run2),
-      },
-    ];
-  }, [run1, run2, metricKey]);
-
-  if (!run1 || !run2) {
-    return (
-      <div className="chart-card">
-        <h3>Metric Comparison</h3>
-        <p className="chart-empty">Select two experiments above to compare</p>
-      </div>
-    );
-  }
-
-  const metric = METRICS[metricKey];
-
-  if (
-    metricKey === 'accuracy' &&
-    (!metric.isRealValue(run1) || !metric.isRealValue(run2))
-  ) {
-    return (
-      <div className="chart-card">
-        <div className="chart-header">
-          <div className="chart-header-text">
-            <h3>Metric Comparison</h3>
-            <p className="chart-subtitle">
-              Accuracy is unavailable for one or both selected runs.
-            </p>
-          </div>
-          <div className="metric-toggle">
-            {Object.entries(METRICS).map(([key, m]) => (
-              <button
-                key={key}
-                className={`metric-toggle-btn ${metricKey === key ? 'active' : ''}`}
-                onClick={() => setMetricKey(key)}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="chart-empty">No captured accuracy is available for this comparison.</p>
-      </div>
-    );
-  }
-
-  if (
-    metricKey === 'samples' &&
-    (!metric.isRealValue(run1) || !metric.isRealValue(run2))
-  ) {
-    return (
-      <div className="chart-card">
-        <div className="chart-header">
-          <div className="chart-header-text">
-            <h3>Metric Comparison</h3>
-            <p className="chart-subtitle">
-              Dataset size is unavailable for one or both selected runs.
-            </p>
-          </div>
-          <div className="metric-toggle">
-            {Object.entries(METRICS).map(([key, m]) => (
-              <button
-                key={key}
-                className={`metric-toggle-btn ${metricKey === key ? 'active' : ''}`}
-                onClick={() => setMetricKey(key)}
-              >
-                {m.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="chart-empty">No captured dataset size is available for this comparison.</p>
-      </div>
-    );
-  }
-
-  return (
     <div className="chart-card">
-      <div className="chart-header">
-        <div className="chart-header-text">
-          <h3>Metric Comparison</h3>
-          <p className="chart-subtitle">
-            Pick a metric to compare the two selected runs
-          </p>
-        </div>
-        <div className="metric-toggle">
-          {Object.entries(METRICS).map(([key, m]) => (
-            <button
-              key={key}
-              className={`metric-toggle-btn ${metricKey === key ? 'active' : ''}`}
-              onClick={() => setMetricKey(key)}
-            >
-              {m.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      {metric.chartType === 'radial'
-        ? <RadialComparison chartData={chartData} />
-        : <BarComparison chartData={chartData} metric={metric} />}
+      <h3>Captured Values</h3>
+
+      <p className="chart-subtitle">
+        Actual recorded values; metrics with
+        different units are shown as separate
+        categories.
+      </p>
+
+      <ResponsiveContainer
+        width="100%"
+        height={300}
+      >
+        <BarChart
+          data={data}
+          margin={{
+            top: 8,
+            right: 12,
+            left: 4,
+            bottom: 8,
+          }}
+        >
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="var(--border-color)"
+            vertical={false}
+          />
+
+          <XAxis
+            dataKey="metric"
+            stroke="var(--text-muted)"
+            tick={{
+              fontSize: 11,
+              fill: 'var(--text-muted)'
+            }}
+            tickLine={false}
+            axisLine={false}
+          />
+
+          <YAxis
+            stroke="var(--text-muted)"
+            tick={{
+              fontSize: 11,
+              fill: 'var(--text-muted)'
+            }}
+            tickLine={false}
+            axisLine={false}
+          />
+
+          <Tooltip
+            contentStyle={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 10,
+              fontSize: 12,
+              color: 'var(--text-primary)',
+              boxShadow: 'var(--shadow-hover)'
+            }}
+            labelStyle={{
+              color: 'var(--text-primary)',
+              fontWeight: 600,
+              marginBottom: 4
+            }}
+            itemStyle={{
+              color: 'var(--text-secondary)'
+            }}
+            cursor={{
+              fill: 'var(--accent-light)',
+              fillOpacity: 0.12
+            }}
+          />
+
+          <Legend />
+
+          <Bar
+            dataKey="run1"
+            name={run1.run_id}
+            fill="var(--accent)"
+            radius={[6, 6, 0, 0]}
+          />
+
+          <Bar
+            dataKey="run2"
+            name={run2.run_id}
+            fill="var(--comparison-secondary)"
+            radius={[6, 6, 0, 0]}
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

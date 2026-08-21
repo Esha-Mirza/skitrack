@@ -49,6 +49,13 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('experiment-tracker-notifications') !== 'off';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,7 +73,30 @@ function AppContent() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleNotificationsChange = (event) => {
+      const enabled = Boolean(event.detail?.enabled);
+      setNotificationsEnabled(enabled);
+      if (!enabled) {
+        setToast(null);
+      }
+    };
+
+    window.addEventListener(
+      'experiment-tracker-notifications-change',
+      handleNotificationsChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        'experiment-tracker-notifications-change',
+        handleNotificationsChange
+      );
+    };
+  }, []);
+
   const showToast = (message, type = 'success') => {
+    if (!notificationsEnabled) return;
     setToast({ message, type });
   };
 

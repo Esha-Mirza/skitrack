@@ -13,11 +13,7 @@ const TITLES = {
   settings: 'Settings',
 };
 
-const INITIAL_NOTIFICATIONS = [
-  { id: 1, text: 'New run tracked successfully', time: 'Just now', read: false },
-  { id: 2, text: 'Dashboard theme updated', time: '2h ago', read: false },
-  { id: 3, text: 'Weekly summary report is ready to export', time: '1d ago', read: false },
-];
+const INITIAL_NOTIFICATIONS = [];
 
 function Header({ onSearch, currentView = 'dashboard' }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);

@@ -18,8 +18,7 @@ export function getAccuracyInfo(run) {
 }
 
 export function getMetricInfo(run, metricName) {
-  const metrics = run?.metrics || {};
-  const value = metrics[metricName];
+  const value = run?.metrics?.[metricName];
 
   if (typeof value !== "number" || !Number.isFinite(value)) {
     return null;
@@ -29,6 +28,10 @@ export function getMetricInfo(run, metricName) {
     value,
     label: metricName,
   };
+}
+
+export function getHyperparameterCount(run) {
+  return Object.keys(run?.params || {}).length;
 }
 
 export function getFastestRun(runs) {
@@ -41,12 +44,12 @@ export function getFastestRun(runs) {
   );
 }
 
-export function getMostParamsRun(runs) {
+export function getMostHyperparametersRun(runs) {
   if (!runs.length) return null;
 
   return runs.reduce(
     (most, run) =>
-      Object.keys(run.params || {}).length > Object.keys(most.params || {}).length
+      getHyperparameterCount(run) > getHyperparameterCount(most)
         ? run
         : most,
     runs[0]
@@ -54,13 +57,18 @@ export function getMostParamsRun(runs) {
 }
 
 export function getBestAccuracyRun(runs) {
-  const scoredRuns = runs.filter((run) => getAccuracyInfo(run).isReal);
+  const scoredRuns = runs.filter(
+    (run) => getAccuracyInfo(run).isReal
+  );
 
   if (!scoredRuns.length) return null;
 
   return scoredRuns.reduce(
     (best, run) =>
-      getAccuracyInfo(run).value > getAccuracyInfo(best).value ? run : best,
+      getAccuracyInfo(run).value >
+      getAccuracyInfo(best).value
+        ? run
+        : best,
     scoredRuns[0]
   );
 }
@@ -69,13 +77,18 @@ export function findSharedNumericParam(runs) {
   const counts = {};
 
   runs.forEach((run) => {
-    Object.entries(run.params || {}).forEach(([key, value]) => {
-      const num = typeof value === "number" ? value : parseFloat(value);
+    Object.entries(run.params || {}).forEach(
+      ([key, value]) => {
+        const num =
+          typeof value === "number"
+            ? value
+            : parseFloat(value);
 
-      if (!Number.isNaN(num) && Number.isFinite(num)) {
-        counts[key] = (counts[key] || 0) + 1;
+        if (!Number.isNaN(num) && Number.isFinite(num)) {
+          counts[key] = (counts[key] || 0) + 1;
+        }
       }
-    });
+    );
   });
 
   let bestKey = null;
@@ -88,7 +101,10 @@ export function findSharedNumericParam(runs) {
     }
   });
 
-  const threshold = Math.max(2, Math.ceil(runs.length * 0.4));
+  const threshold = Math.max(
+    2,
+    Math.ceil(runs.length * 0.4)
+  );
 
   return bestCount >= threshold ? bestKey : null;
 }
@@ -117,63 +133,118 @@ export function findDataConsistencyIssues(runs) {
 export function buildDatasetLeaderboard(runs) {
   const groups = {};
 
-  runs.filter((run) => run.dataset_hash).forEach((run) => {
-    const key = run.dataset_name || run.dataset_hash;
+  runs
+    .filter((run) => run.dataset_hash)
+    .forEach((run) => {
+      const key = run.dataset_hash;
 
-    if (!groups[key]) {
-      groups[key] = {
-        datasetHash: run.dataset_hash,
-        datasetName: run.dataset_name || null,
-        samples: run.dataset_shape?.[0] ?? null,
-        features: run.dataset_shape?.[1] ?? null,
-        runs: [],
-      };
-    }
+      if (!groups[key]) {
+        groups[key] = {
+          datasetHash: run.dataset_hash,
+          datasetName: run.dataset_name || null,
+          samples: run.dataset_shape?.[0] ?? null,
+          features: run.dataset_shape?.[1] ?? null,
+          runs: [],
+        };
+      }
 
-    groups[key].runs.push(run);
-  });
+      if (!groups[key].datasetName && run.dataset_name) {
+        groups[key].datasetName = run.dataset_name;
+      }
+
+      groups[key].runs.push(run);
+    });
 
   return Object.values(groups)
     .map((group) => {
-      const scoredRuns = group.runs.filter(
-        (run) => getAccuracyInfo(run).isReal
-      );
-
-      const fastestTime =
-        Math.min(...group.runs.map((run) => run.training_time)) || 1;
-
       const bestByModel = {};
 
-      scoredRuns.forEach((run) => {
-        const accuracy = getAccuracyInfo(run).value;
+      group.runs.forEach((run) => {
+        const accuracy = getAccuracyInfo(run);
+        if (!accuracy.isReal) return;
 
-        const speedScore = Number(
-          (
-            (100 * fastestTime) /
-            Math.max(run.training_time, Number.EPSILON)
-          ).toFixed(1)
-        );
-
-        const composite = Number(
-          ((accuracy + speedScore) / 2).toFixed(1)
-        );
-
+        const trainingTime = Number(run.training_time);
         const existing = bestByModel[run.model_name];
 
-        if (!existing || composite > existing.composite) {
+        // Keep the strongest run for each model on this dataset.
+        // Accuracy is the primary quality signal; training time breaks ties.
+        if (
+          !existing ||
+          accuracy.value > existing.accuracyValue ||
+          (accuracy.value === existing.accuracyValue &&
+            Number.isFinite(trainingTime) &&
+            (!Number.isFinite(existing.trainingTime) ||
+              trainingTime < existing.trainingTime))
+        ) {
           bestByModel[run.model_name] = {
             modelName: run.model_name,
             run,
-            accuracyValue: accuracy,
+            accuracyValue: accuracy.value,
+            trainingTime: Number.isFinite(trainingTime)
+              ? trainingTime
+              : null,
             isReal: true,
-            speedScore,
-            composite,
           };
         }
       });
 
-      const ranked = Object.values(bestByModel)
-        .sort((a, b) => b.composite - a.composite)
+      const entries = Object.values(bestByModel);
+      const times = entries
+        .map((entry) => entry.trainingTime)
+        .filter(
+          (value) =>
+            Number.isFinite(value) && value >= 0
+        );
+
+      const minTime = times.length
+        ? Math.min(...times)
+        : null;
+
+      const maxTime = times.length
+        ? Math.max(...times)
+        : null;
+
+      const ranked = entries
+        .map((entry) => {
+          // Normalize speed within this dataset so it is comparable with accuracy.
+          let efficiencyScore = 100;
+
+          if (
+            minTime !== null &&
+            maxTime !== null &&
+            maxTime > minTime &&
+            Number.isFinite(entry.trainingTime)
+          ) {
+            efficiencyScore =
+              ((maxTime - entry.trainingTime) /
+                (maxTime - minTime)) *
+              100;
+          }
+
+          // Accuracy remains the dominant signal; training efficiency contributes 20%.
+          const overallScore =
+            entry.accuracyValue * 0.8 +
+            efficiencyScore * 0.2;
+
+          return {
+            ...entry,
+            efficiencyScore: Number(
+              efficiencyScore.toFixed(1)
+            ),
+            overallScore: Number(
+              overallScore.toFixed(1)
+            ),
+          };
+        })
+        .sort(
+          (a, b) =>
+            b.overallScore - a.overallScore ||
+            b.accuracyValue - a.accuracyValue ||
+            (a.trainingTime ??
+              Number.POSITIVE_INFINITY) -
+              (b.trainingTime ??
+                Number.POSITIVE_INFINITY)
+        )
         .map((entry, index) => ({
           ...entry,
           rank: index + 1,
@@ -183,14 +254,13 @@ export function buildDatasetLeaderboard(runs) {
         ...group,
         ranked,
         runCount: group.runs.length,
-        unscoredRunCount: group.runs.length - scoredRuns.length,
+        unscoredRunCount:
+          group.runs.length -
+          group.runs.filter(
+            (run) => getAccuracyInfo(run).isReal
+          ).length,
       };
-    })
-    .sort(
-      (a, b) =>
-        b.ranked.length - a.ranked.length ||
-        (b.samples ?? -1) - (a.samples ?? -1)
-    );
+    });
 }
 
 export function formatShortDate(timestamp) {
@@ -200,8 +270,11 @@ export function formatShortDate(timestamp) {
     return String(timestamp);
   }
 
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  return date.toLocaleDateString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+    }
+  );
 }
