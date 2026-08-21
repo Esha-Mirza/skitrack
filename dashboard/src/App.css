@@ -24,6 +24,7 @@
   --accent: #e01e2b;
   --accent-hover: #ff3b47;
   --accent-light: rgba(224, 30, 43, 0.1);
+  --comparison-secondary: #b45f67;
   --accent-gradient: linear-gradient(135deg, #ff4d4d 0%, #e01e2b 60%, #a3121f 100%);
   --sidebar-bg: #ffffff;
   --sidebar-border: #f0e3e5;
@@ -54,6 +55,7 @@
   --accent: #ff3b47;
   --accent-hover: #ff5b63;
   --accent-light: rgba(255, 59, 71, 0.16);
+  --comparison-secondary: #ff7a82;
   --accent-gradient: linear-gradient(135deg, #ff5b63 0%, #e01e2b 55%, #6e0e15 100%);
   --sidebar-bg: #0d0909;
   --sidebar-border: rgba(255, 255, 255, 0.06);
@@ -2645,7 +2647,7 @@ button:active {
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  padding-bottom: 16px;
+  padding: 16px 0;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -2657,8 +2659,47 @@ button:active {
 }
 
 .dataset-tabs {
-  justify-content: flex-end;
-  max-width: 62%;
+  display: flex;
+  width: 100%;
+  overflow-x: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  scrollbar-width: none;
+}
+
+.dataset-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dataset-tab {
+  flex: 1 0 auto;
+  min-width: 140px;
+  padding: 7px 14px;
+  border: none;
+  border-right: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-family);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.dataset-tab:last-child {
+  border-right: none;
+}
+
+.dataset-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.dataset-tab.active {
+  background: var(--accent);
+  color: white;
 }
 
 .dataset-group-card {
@@ -2720,9 +2761,9 @@ button:active {
 
 .dataset-rank-row {
   display: grid;
-  grid-template-columns: 28px minmax(220px, 1fr) 90px 110px 70px 50px 42px;
+  grid-template-columns: 28px minmax(250px, 1fr) 90px 110px 70px 50px 42px;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dataset-rank-header span {
@@ -2745,7 +2786,7 @@ button:active {
 
 .dataset-rank-run {
   display: block;
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 11px;
   line-height: 1.25;
 }
@@ -2785,7 +2826,6 @@ button:active {
 
   .dataset-tabs {
     max-width: 100%;
-    justify-content: flex-start;
   }
 
   .dataset-group-card {
@@ -2796,6 +2836,7 @@ button:active {
     min-width: 760px;
   }
 }
+
 
 /* ============================================
    COMPARISON-ONLY UI FIXES
