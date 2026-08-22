@@ -4,6 +4,8 @@ setup(
     name="skitrack",
     version="0.1.0",
     description="Lightweight ML experiment tracking with local storage",
+    long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     author="Esha-Mirza",
     packages=find_packages(exclude=["experiment_tracker.static", "experiment_tracker.static.*"]),
     include_package_data=False,
