@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ComparisonSelector from './ComparisonSelector';
 import ComparisonView from './ComparisonView';
 
@@ -11,6 +11,14 @@ function ComparisonPage({ runs }) {
     setSelectedIds(newSelected);
   };
 
+  const handleSwap = () => {
+    setSelectedIds([selectedIds[1], selectedIds[0]]);
+  };
+
+  const handleClear = () => {
+    setSelectedIds([null, null]);
+  };
+
   const getRun = (id) => {
     if (!id) return null;
     return runs.find(run => run.id === parseInt(id)) || null;
@@ -21,15 +29,19 @@ function ComparisonPage({ runs }) {
 
   return (
     <div className="comparison-page">
-      <h2>Run Comparison</h2>
-      <p className="description">Compare two experiments side by side</p>
-      
-      <ComparisonSelector 
-        runs={runs} 
+      <div className="page-heading">
+        <h2>Run Comparison</h2>
+        <p className="description">Compare two experiments side by side to spot what changed</p>
+      </div>
+
+      <ComparisonSelector
+        runs={runs}
         selectedRuns={selectedIds}
         onSelect={handleSelect}
+        onSwap={handleSwap}
+        onClear={handleClear}
       />
-      
+
       <ComparisonView run1={run1} run2={run2} />
     </div>
   );

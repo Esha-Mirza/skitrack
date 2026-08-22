@@ -1,0 +1,16 @@
+recursive-include experiment_tracker/static *.html *.js *.css *.png *.ico *.svg *.json *.woff *.woff2 *.ttf
+prune dashboard
+prune venv
+prune .venv
+prune .pytest_cache
+prune data
+prune experiment_tracker.egg-info
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude *.db
+global-exclude *.sqlite
+global-exclude *.sqlite3
+global-exclude node_modules
+global-exclude .vite
+global-exclude dist

@@ -1,14 +1,17 @@
-import React from 'react';
+import { Download, CheckCircle2, Loader2 } from 'lucide-react';
 import { downloadHTMLReport } from './ReportGenerator';
+import { useDarkMode } from '../hooks/useDarkMode';
+import React from 'react';
 
 function ExportButton({ run, variant = 'primary' }) {
+  const { isDark } = useDarkMode();
   const [exporting, setExporting] = React.useState(false);
   const [showSuccess, setShowSuccess] = React.useState(false);
 
   const handleExport = () => {
     setExporting(true);
     try {
-      const success = downloadHTMLReport(run);
+      const success = downloadHTMLReport(run, isDark);
       if (success) {
         setShowSuccess(true);
         setTimeout(() => setShowSuccess(false), 3000);
@@ -28,11 +31,20 @@ function ExportButton({ run, variant = 'primary' }) {
       disabled={exporting}
     >
       {exporting ? (
-        'Generating...'
+        <>
+          <Loader2 size={14} className="spin-icon" />
+          Generating...
+        </>
       ) : showSuccess ? (
-        '✓ Exported!'
+        <>
+          <CheckCircle2 size={14} />
+          Exported!
+        </>
       ) : (
-        'Export HTML Report'
+        <>
+          <Download size={14} />
+          Export HTML Report
+        </>
       )}
     </button>
   );

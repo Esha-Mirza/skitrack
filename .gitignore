@@ -24,17 +24,14 @@ wheels/
 *.egg
 MANIFEST
 
-
 .venv/
 venv/
 env/
-
 
 *.db
 *.sqlite
 *.sqlite3
 data/*.db
-
 
 .vscode/
 .idea/
@@ -42,13 +39,10 @@ data/*.db
 *.swo
 *~
 
-
 .DS_Store
 Thumbs.db
 
-
 *.log
-
 
 node_modules/
 npm-debug.log*
@@ -59,11 +53,9 @@ dist/
 dist-ssr/
 *.local
 
-
 .env
 .env.local
 .env.*.local
-
 
 *.pkl
 *.joblib
@@ -71,10 +63,8 @@ dist-ssr/
 *.pt
 *.pth
 
-
 .ipynb_checkpoints/
 *.ipynb
-
 
 .coverage
 htmlcov/
@@ -84,8 +74,37 @@ htmlcov/
 .dmypy.json
 dmypy.json
 
-
 *.csv
 *.db
 *.sqlite
 *.sqlite3
+
+compomemts/
+
+
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.vite
+*.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+dashboard/.vite/
+dashboard/.vite/

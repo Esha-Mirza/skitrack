@@ -1,65 +1,88 @@
-import React from 'react';
-import { 
-  Layers, 
-  Cpu, 
-  Clock, 
-  Hash, 
-  TrendingUp, 
+import {
+  Layers,
+  Cpu,
+  Clock,
+  Hash,
   Calendar,
   Award
 } from 'lucide-react';
+import {
+  getAccuracyInfo,
+  getBestAccuracyRun,
+  getHyperparameterCount
+} from '../../utils/metrics';
 
 function StatsCards({ runs }) {
   const totalRuns = runs.length;
-  const uniqueModels = [...new Set(runs.map(r => r.model_name))];
-  const avgTime = runs.length ? 
-    runs.reduce((sum, r) => sum + r.training_time, 0) / runs.length : 0;
-  const totalParams = runs.length ? 
-    runs.reduce((sum, r) => sum + Object.keys(r.params).length, 0) : 0;
-  
+  const uniqueModels = [
+    ...new Set(runs.map(r => r.model_name))
+  ];
+
+  const totalHyperparameters = runs.reduce(
+    (sum, run) =>
+      sum + getHyperparameterCount(run),
+    0
+  );
+
+  const avgTime = runs.length
+    ? runs.reduce(
+        (sum, r) => sum + r.training_time,
+        0
+      ) / runs.length
+    : 0;
+
   const today = new Date().toDateString();
-  const runsToday = runs.filter(r => 
-    new Date(r.timestamp).toDateString() === today
+
+  const runsToday = runs.filter(
+    r =>
+      new Date(r.timestamp).toDateString() ===
+      today
   ).length;
 
-  const bestAccuracy = runs.length ? '96.7%' : 'N/A'; // Simulated
+  const bestAccuracyRun =
+    getBestAccuracyRun(runs);
+
+  const bestAccuracyInfo =
+    getAccuracyInfo(bestAccuracyRun);
 
   const cards = [
-    { 
-      label: 'Total Runs', 
-      value: totalRuns, 
+    {
+      label: 'Total Runs',
+      value: totalRuns,
       icon: Layers,
-      color: '#667eea',
+      color: '#e01e2b',
     },
-    { 
-      label: 'Models Used', 
-      value: uniqueModels.length, 
+    {
+      label: 'Models Used',
+      value: uniqueModels.length,
       icon: Cpu,
-      color: '#764ba2',
+      color: '#ff5b63',
     },
-    { 
-      label: 'Avg Training Time', 
-      value: `${avgTime.toFixed(3)}s`, 
+    {
+      label: 'Avg Training Time',
+      value: `${avgTime.toFixed(3)}s`,
       icon: Clock,
-      color: '#48bb78',
+      color: '#a3121f',
     },
-    { 
-      label: 'Total Parameters', 
-      value: totalParams, 
+    {
+      label: 'Hyperparameter Entries',
+      value: totalHyperparameters,
       icon: Hash,
-      color: '#f6ad55',
+      color: '#ff8a8f',
     },
-    { 
-      label: 'Runs Today', 
-      value: runsToday, 
+    {
+      label: 'Runs Today',
+      value: runsToday,
       icon: Calendar,
-      color: '#fc8181',
+      color: '#c81124',
     },
-    { 
-      label: 'Best Accuracy', 
-      value: bestAccuracy, 
+    {
+      label: 'Best Accuracy',
+      value: bestAccuracyInfo.isReal
+        ? `${bestAccuracyInfo.value}%`
+        : 'N/A',
       icon: Award,
-      color: '#4fd1c5',
+      color: '#ff3b47',
     },
   ];
 
@@ -67,15 +90,31 @@ function StatsCards({ runs }) {
     <div className="stats-grid">
       {cards.map((card, index) => {
         const Icon = card.icon;
+
         return (
-          <div key={index} className="stat-card">
+          <div
+            key={index}
+            className="stat-card"
+          >
             <div className="stat-card-header">
-              <div className="stat-icon" style={{ background: `${card.color}20`, color: card.color }}>
+              <div
+                className="stat-icon"
+                style={{
+                  background: `${card.color}20`,
+                  color: card.color
+                }}
+              >
                 <Icon size={20} />
               </div>
             </div>
-            <div className="stat-value">{card.value}</div>
-            <div className="stat-label">{card.label}</div>
+
+            <div className="stat-value">
+              {card.value}
+            </div>
+
+            <div className="stat-label">
+              {card.label}
+            </div>
           </div>
         );
       })}

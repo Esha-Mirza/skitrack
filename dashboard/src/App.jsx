@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ThemeProvider } from './context/ThemeContext';
 import { useDarkMode } from './hooks/useDarkMode';
@@ -7,6 +7,8 @@ import { useDarkMode } from './hooks/useDarkMode';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import StatsCards from './components/layout/StatsCards';
+import Leaderboard from './components/layout/Leaderboard';
+import DatasetLeaderboard from './components/layout/Datasetleaderboard';
 
 // Chart Components
 import TrainingTimeChart from './components/charts/TrainingTimeChart';
@@ -15,13 +17,23 @@ import ParameterChart from './components/charts/ParameterChart';
 import ModelDistributionChart from './components/charts/ModelDistributionChart';
 import ScatterChart from './components/charts/ScatterChart';
 import DatasetSizeChart from './components/charts/DatasetSizeChart';
+import TrainingTrendChart from './components/charts/TrainingTrendChart';
+import ParameterImpactChart from './components/charts/ParameterImpactChart';
+import ModelBreakdownChart from './components/charts/ModelBreakdownChart';
 
 // Table Components
 import ExperimentsTable from './components/tables/ExperimentsTable';
 
+// Feature Pages
+import ComparisonPage from './components/ComparisonPage';
+import ExportPage from './components/ExportPage';
+import SettingsPage from './components/SettingsPage';
+import DataConsistencyPanel from './components/DataConsistencyPanel';
+
 // UI Components
 import LoadingSkeleton from './components/ui/LoadingSkeleton';
 import ToastNotification from './components/ui/ToastNotification';
+import RunDetailModal from './components/ui/RunDetailModal';
 
 // Pages
 import HelpPage from './components/Help/HelpPage';
@@ -37,11 +49,18 @@ function AppContent() {
   const [currentView, setCurrentView] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('experiment-tracker-notifications') !== 'off';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:5000/api/runs');
+        const response = await axios.get('/api/runs');
         setRuns(response.data.data);
         setLoading(false);
       } catch (err) {
@@ -50,12 +69,39 @@ function AppContent() {
         console.error('Error:', err);
       }
     };
-    
+
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const handleNotificationsChange = (event) => {
+      const enabled = Boolean(event.detail?.enabled);
+      setNotificationsEnabled(enabled);
+      if (!enabled) {
+        setToast(null);
+      }
+    };
+
+    window.addEventListener(
+      'experiment-tracker-notifications-change',
+      handleNotificationsChange
+    );
+
+    return () => {
+      window.removeEventListener(
+        'experiment-tracker-notifications-change',
+        handleNotificationsChange
+      );
+    };
+  }, []);
+
   const showToast = (message, type = 'success') => {
+    if (!notificationsEnabled) return;
     setToast({ message, type });
+  };
+
+  const handleViewChange = (view) => {
+    setCurrentView(view);
   };
 
   if (loading) {
@@ -67,7 +113,7 @@ function AppContent() {
       <div className="error-container">
         <h2>Error</h2>
         <p>{error}</p>
-        <p>Run: <code>python -c "from experiment_tracker.api import app; app.run(debug=True, port=5000)"</code></p>
+        <p>Run: <code>python -c &quot;from experiment_tracker.api import app; app.run(debug=True, port=5000)&quot;</code></p>
       </div>
     );
   }
@@ -78,6 +124,8 @@ function AppContent() {
         return (
           <>
             <StatsCards runs={runs} />
+            <Leaderboard runs={runs} onViewRun={setSelectedRun} />
+            <DatasetLeaderboard runs={runs} onViewRun={setSelectedRun} />
             <div className="charts-grid">
               <TrainingTimeChart data={runs} />
               <AccuracyChart data={runs} />
@@ -86,41 +134,62 @@ function AppContent() {
               <ScatterChart data={runs} />
               <DatasetSizeChart data={runs} />
             </div>
-            <ExperimentsTable 
-              runs={runs} 
+            <ExperimentsTable
+              runs={runs}
               onViewRun={setSelectedRun}
               searchQuery={searchQuery}
             />
           </>
         );
-      
+
       case 'experiments':
         return (
-          <ExperimentsTable 
-            runs={runs} 
+          <ExperimentsTable
+            runs={runs}
             onViewRun={setSelectedRun}
             searchQuery={searchQuery}
           />
         );
-      
+
       case 'analytics':
         return (
           <>
             <StatsCards runs={runs} />
-            <div className="charts-grid">
+            <DatasetLeaderboard runs={runs} onViewRun={setSelectedRun} />
+            <div className="charts-grid charts-grid-featured">
+              <TrainingTrendChart data={runs} />
+            </div>
+            <div className="charts-grid charts-grid-secondary">
               <TrainingTimeChart data={runs} />
               <AccuracyChart data={runs} />
               <ParameterChart data={runs} />
               <ModelDistributionChart data={runs} />
               <ScatterChart data={runs} />
               <DatasetSizeChart data={runs} />
+              <ParameterImpactChart data={runs} />
+              <ModelBreakdownChart data={runs} />
             </div>
+            <DataConsistencyPanel runs={runs} />
           </>
         );
-      
+
+      case 'compare':
+        return <ComparisonPage runs={runs} />;
+
+      case 'export':
+        return (
+          <ExportPage
+            runs={runs}
+            onExported={() => showToast('Report downloaded successfully')}
+          />
+        );
+
+      case 'settings':
+        return <SettingsPage />;
+
       case 'help':
         return <HelpPage />;
-      
+
       default:
         return <StatsCards runs={runs} />;
     }
@@ -128,16 +197,24 @@ function AppContent() {
 
   return (
     <div className={`app ${isDark ? 'dark' : 'light'}`}>
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+      <Sidebar currentView={currentView} onViewChange={handleViewChange} />
       <div className="main-content">
-        <Header onSearch={setSearchQuery} />
+        <Header onSearch={setSearchQuery} currentView={currentView} />
         <main className="content">
-          {renderContent()}
+          <div key={currentView} className="page-fade">
+            {renderContent()}
+          </div>
         </main>
       </div>
+      {selectedRun && (
+        <RunDetailModal
+          run={selectedRun}
+          onClose={() => setSelectedRun(null)}
+        />
+      )}
       {toast && (
-        <ToastNotification 
-          message={toast.message} 
+        <ToastNotification
+          message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
         />

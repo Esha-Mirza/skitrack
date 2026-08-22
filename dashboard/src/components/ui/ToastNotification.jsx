@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { CheckCircle, AlertCircle, X } from 'lucide-react';
 
 function ToastNotification({ message, type = 'success', onClose, duration = 3000 }) {

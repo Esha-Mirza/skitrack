@@ -1,4 +1,3 @@
-
 import sys
 import pandas as pd
 import numpy as np
@@ -6,8 +5,6 @@ import sklearn
 import sqlalchemy
 import click
 import joblib
-from dotenv import load_dotenv
-
 
 print("---Environment Test---\n\n")
 

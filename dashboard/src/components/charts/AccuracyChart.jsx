@@ -1,36 +1,59 @@
-import React from 'react';
+import { useMemo } from 'react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell
 } from 'recharts';
+import { getAccuracyInfo } from '../../utils/metrics';
 
-const COLORS = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+const COLORS = ['#e01e2b', '#ff5b63', '#ff8a8f', '#c81124', '#ffb3b6', '#8f0d18'];
 
 function AccuracyChart({ data }) {
-  // Simulate accuracy data (since we don't have actual accuracy yet)
-  const chartData = data.map((run, index) => ({
-    name: run.run_id.slice(-6),
-    accuracy: 85 + Math.random() * 15,
-    model: run.model_name
-  }));
+  const chartData = useMemo(
+    () =>
+      data
+        .map(run => {
+          const info = getAccuracyInfo(run);
+
+          return {
+            name: run.run_id.slice(-6),
+            accuracy: info.value,
+            model: run.model_name,
+          };
+        })
+        .filter(run => run.accuracy !== null),
+    [data]
+  );
 
   return (
     <div className="chart-card">
       <h3>Model Accuracy</h3>
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis dataKey="name" stroke="#4a5568" />
-          <YAxis domain={[0, 100]} label={{ value: 'Accuracy (%)', angle: -90, position: 'insideLeft', style: { fill: '#4a5568' } }} />
-          <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)' }} />
-          <Legend />
-          <Bar dataKey="accuracy" radius={[4, 4, 0, 0]}>
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <p className="chart-subtitle">Captured accuracy per run (%)</p>
+      {chartData.length ? (
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={chartData} margin={{ top: 8, right: 12, left: 4, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
+            <XAxis dataKey="name" stroke="var(--text-muted)" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickLine={false} axisLine={false} />
+            <YAxis domain={[0, 100]} stroke="var(--text-muted)" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} tickLine={false} axisLine={false} width={36} />
+            <Tooltip
+              contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
+              labelStyle={{ color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}
+              itemStyle={{ color: 'var(--text-secondary)' }}
+              cursor={{ fill: 'var(--accent-light)' }}
+              formatter={value => [`${value}%`, 'Accuracy']}
+            />
+            <Bar dataKey="accuracy" name="Accuracy (%)" radius={[6, 6, 0, 0]} maxBarSize={36}>
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <p className="chart-empty">No captured accuracy metrics are available.</p>
+      )}
     </div>
   );
 }
