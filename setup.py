@@ -7,6 +7,8 @@ setup(
     author="Esha-Mirza",
     packages=find_packages(exclude=["experiment_tracker.static", "experiment_tracker.static.*"]),
     include_package_data=False,
+    license="MIT",
+    license_files=["LICENSE"],
     package_data={
         "experiment_tracker": [
             "static/*",
