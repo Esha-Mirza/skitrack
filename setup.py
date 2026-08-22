@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="experiment-tracker",
+    name="skitrack",
     version="0.1.0",
     description="Lightweight ML experiment tracking with local storage",
     author="Esha-Mirza",

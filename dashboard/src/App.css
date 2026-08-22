@@ -1,15 +1,11 @@
-/* ============================================
-   IMPORTS & ROOT VARIABLES
-   ============================================ */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ============================================
-   THEME VARIABLES
-   ============================================ */
+
 [data-theme="light"] {
   --bg-primary: #f6f3f4;
   --bg-secondary: #ffffff;
@@ -72,9 +68,7 @@
   --overlay: rgba(0, 0, 0, 0.65);
 }
 
-/* ============================================
-   SHARED ANIMATION KEYFRAMES
-   ============================================ */
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
@@ -105,9 +99,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ============================================
-   GLOBAL RESET
-   ============================================ */
+
 * {
   margin: 0;
   padding: 0;
@@ -121,9 +113,7 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ============================================
-   SCROLLBAR
-   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -142,9 +132,7 @@ body {
   background: var(--accent);
 }
 
-/* ============================================
-   APP LAYOUT
-   ============================================ */
+
 .app {
   display: flex;
   min-height: 100vh;
@@ -166,9 +154,7 @@ body {
   z-index: 0;
 }
 
-/* ============================================
-   SIDEBAR
-   ============================================ */
+
 .sidebar {
   width: 240px;
   height: 100vh;
@@ -276,9 +262,7 @@ body {
   border-top: 1px solid var(--sidebar-border);
 }
 
-/* ============================================
-   MAIN CONTENT
-   ============================================ */
+
 .main-content {
   flex: 1;
   min-height: 100vh;
@@ -287,9 +271,7 @@ body {
   margin-left: 240px;
 }
 
-/* ============================================
-   HEADER
-   ============================================ */
+
 .header {
   display: flex;
   align-items: center;
@@ -362,9 +344,7 @@ body {
   border: 2px solid var(--bg-secondary);
 }
 
-/* ============================================
-   HEADER DROPDOWNS
-   ============================================ */
+
 .header-dropdown {
   position: absolute;
   top: calc(100% + 10px);
@@ -470,9 +450,7 @@ body {
   color: var(--text-muted);
 }
 
-/* ============================================
-   SEARCH BAR
-   ============================================ */
+
 .search-bar {
   display: flex;
   align-items: center;
@@ -525,9 +503,6 @@ body {
   background: var(--bg-hover);
 }
 
-/* ============================================
-   THEME TOGGLE
-   ============================================ */
 .theme-toggle {
   padding: 8px;
   border: none;
@@ -543,9 +518,7 @@ body {
   color: var(--text-primary);
 }
 
-/* ============================================
-   CONTENT
-   ============================================ */
+
 .content {
   flex: 1;
   padding: 24px 32px;
@@ -557,9 +530,7 @@ body {
   animation: fadeInUp 0.4s ease both;
 }
 
-/* ============================================
-   STATS CARDS
-   ============================================ */
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -639,9 +610,7 @@ body {
   font-weight: 500;
 }
 
-/* ============================================
-   CHARTS
-   ============================================ */
+
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -726,9 +695,7 @@ body {
   padding: 40px 0;
 }
 
-/* ============================================
-   CHART TYPE TOGGLE
-   ============================================ */
+
 .chart-type-toggle {
   display: flex;
   gap: 4px;
@@ -839,9 +806,7 @@ body {
   color: var(--text-primary);
 }
 
-/* ============================================
-   TABLE
-   ============================================ */
+
 .table-container {
   background: var(--bg-card);
   border-radius: 12px;
@@ -1035,9 +1000,7 @@ body {
   cursor: not-allowed;
 }
 
-/* ============================================
-   BUTTON PRESS FEEDBACK (shared)
-   ============================================ */
+
 button {
   -webkit-tap-highlight-color: transparent;
 }
@@ -1052,9 +1015,7 @@ button:active {
   transform: scale(0.93);
 }
 
-/* ============================================
-   LEADERBOARD
-   ============================================ */
+
 .leaderboard-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1143,9 +1104,7 @@ button:active {
   border-color: var(--accent);
 }
 
-/* ============================================
-   DATASET LEADERBOARD
-   ============================================ */
+
 .dataset-leaderboard-empty {
   display: flex;
   flex-direction: column;
@@ -1327,9 +1286,7 @@ button:active {
   color: var(--text-muted);
 }
 
-/* ============================================
-   DATA CONSISTENCY PANEL
-   ============================================ */
+
 .consistency-panel {
   border-radius: 14px;
   padding: 18px 22px;
@@ -1400,9 +1357,7 @@ button:active {
   color: var(--text-secondary);
 }
 
-/* ============================================
-   COMPARISON PAGE
-   ============================================ */
+
 .comparison-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -1811,9 +1766,7 @@ button:active {
   background: var(--success-light);
 }
 
-/* ============================================
-   EXPORT BUTTON
-   ============================================ */
+
 .export-btn {
   display: inline-flex;
   align-items: center;
@@ -1865,9 +1818,7 @@ button:active {
   transform: none !important;
 }
 
-/* ============================================
-   EXPORT PAGE
-   ============================================ */
+
 .export-page {
   max-width: 1100px;
   margin: 0 auto;
@@ -1961,9 +1912,7 @@ button:active {
   color: var(--text-muted);
 }
 
-/* ============================================
-   RUN DETAIL MODAL
-   ============================================ */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -2088,9 +2037,6 @@ button:active {
   border-top: 1px solid var(--border-color);
 }
 
-/* ============================================
-   SETTINGS PAGE
-   ============================================ */
 .settings-page {
   max-width: 700px;
   margin: 0 auto;
@@ -2163,9 +2109,7 @@ button:active {
   transform: translateX(20px);
 }
 
-/* ============================================
-   HELP PAGE
-   ============================================ */
+
 .help-page {
   max-width: 900px;
   margin: 0 auto;
@@ -2276,9 +2220,7 @@ button:active {
   color: var(--text-primary);
 }
 
-/* ============================================
-   TOAST
-   ============================================ */
+
 .toast {
   position: fixed;
   bottom: 24px;
@@ -2337,9 +2279,7 @@ button:active {
   color: var(--text-primary);
 }
 
-/* ============================================
-   SKELETON LOADING
-   ============================================ */
+
 .skeleton-container {
   padding: 24px 32px;
 }
@@ -2427,9 +2367,7 @@ button:active {
   }
 }
 
-/* ============================================
-   ERROR CONTAINER
-   ============================================ */
+
 .error-container {
   display: flex;
   flex-direction: column;
@@ -2459,9 +2397,7 @@ button:active {
   border: 1px solid var(--border-color);
 }
 
-/* ============================================
-   RESPONSIVE
-   ============================================ */
+
 @media (max-width: 1400px) {
   .charts-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2610,9 +2546,7 @@ button:active {
   }
 }
 
-/* ============================================
-   PRINT STYLES
-   ============================================ */
+
 @media print {
   .sidebar,
   .header {
@@ -2632,7 +2566,7 @@ button:active {
   }
 }
 
-/* Dataset leaderboard refinements */
+
 .dataset-leaderboard {
   margin-bottom: 24px;
   background: var(--bg-card);
@@ -2838,11 +2772,6 @@ button:active {
 }
 
 
-/* ============================================
-   COMPARISON-ONLY UI FIXES
-   ============================================ */
-
-/* Keep the comparison sections visually separated. */
 .comparison-view > .chart-card {
   margin-bottom: 24px;
 }
@@ -2851,7 +2780,7 @@ button:active {
   margin-top: 24px;
 }
 
-/* Radar / diamond comparison graph. */
+
 .comparison-radar-chart {
   width: 100%;
   height: 300px;
@@ -2872,7 +2801,7 @@ button:active {
   font-size: 10px;
 }
 
-/* Captured Values hover follows the active theme in both modes. */
+
 .comparison-captured-values {
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }

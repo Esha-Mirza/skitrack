@@ -206,7 +206,7 @@ export function buildDatasetLeaderboard(runs) {
 
       const ranked = entries
         .map((entry) => {
-          // Normalize speed within this dataset so it is comparable with accuracy.
+          
           let efficiencyScore = 100;
 
           if (
@@ -221,7 +221,7 @@ export function buildDatasetLeaderboard(runs) {
               100;
           }
 
-          // Accuracy remains the dominant signal; training efficiency contributes 20%.
+
           const overallScore =
             entry.accuracyValue * 0.8 +
             efficiencyScore * 0.2;

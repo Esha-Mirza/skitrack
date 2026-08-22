@@ -75,7 +75,7 @@ function SettingsPage() {
         <div className="settings-row">
           <div className="settings-row-text">
             <strong><Info size={14} style={{ verticalAlign: -2, marginRight: 6 }} />Version</strong>
-            <span>Local-First Experiment Tracker · Dashboard v1.0.0</span>
+            <span>SkiTrack · Dashboard v1.0.0</span>
           </div>
         </div>
       </div>

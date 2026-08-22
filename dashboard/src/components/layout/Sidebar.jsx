@@ -24,7 +24,7 @@ function Sidebar({ currentView, onViewChange }) {
       <div className="sidebar-header">
         <div className="logo">
           <Activity size={28} className="logo-icon" />
-          <span className="logo-text">ExpTracker</span>
+          <span className="logo-text">SkiTrack</span>
         </div>
       </div>
       <nav className="sidebar-nav">

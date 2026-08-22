@@ -60,8 +60,8 @@ def train_model():
   return (
     <div className="help-page">
       <div className="help-header">
-        <h1>Getting Started</h1>
-        <p className="help-subtitle">Track, analyze, compare, and export experiments from one local-first Python package.</p>
+        <h1>Getting Started with SkiTrack</h1>
+        <p className="help-subtitle">Track, analyze, compare, and export experiments from one SkiTrack Python package.</p>
       </div>
 
       <div className="help-steps">
