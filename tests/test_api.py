@@ -2,6 +2,8 @@
 import pytest
 from experiment_tracker import api as api_module
 
+PNG_MAGIC = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     db_path = str(tmp_path / "api_test.db")
@@ -87,6 +89,32 @@ def test_unknown_path_falls_back_to_index(client):
     response = client.get("/some/made/up/path")
     assert response.status_code == 200
     assert b"<div id=\"root\">" in response.data
+
+def test_favicon_is_served_as_an_image(client):
+    response = client.get("/favicon.ico")
+    assert response.status_code == 200
+    assert response.mimetype == "image/png"
+    assert response.data.startswith(PNG_MAGIC)
+
+
+def test_declared_icon_path_is_served_as_an_image(client):
+    response = client.get("/assets/EM-icon.png")
+    assert response.status_code == 200
+    assert response.mimetype == "image/png"
+    assert response.data.startswith(PNG_MAGIC)
+
+
+def test_index_declares_the_icon_with_a_type(client):
+    body = client.get("/").data.decode("utf-8")
+    assert 'rel="icon"' in body
+    assert 'type="image/png"' in body
+
+
+def test_missing_file_returns_404_instead_of_index(client):
+    response = client.get("/apple-touch-icon.png")
+    assert response.status_code == 404
+    assert b"<div id=\"root\">" not in response.data
+
 
 def test_dashboard_uses_package_static_directory():
     import os

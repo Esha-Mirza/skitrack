@@ -1,0 +1,22 @@
+# The built dashboard is committed under experiment_tracker/static so it can be
+# shipped inside the Python package. Git must leave those files exactly as
+# "npm run build" produced them. With core.autocrlf=true (the Windows default)
+# git otherwise rewrites the minified CSS and JS to CRLF on checkout, so the
+# working tree no longer matches the build output and the bytes that get
+# packaged into the wheel differ from machine to machine.
+experiment_tracker/static/** -text
+dashboard/dist/** -text
+
+# Never run line ending conversion on binary assets such as the dashboard icon.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.svg text
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pkl binary
+*.joblib binary

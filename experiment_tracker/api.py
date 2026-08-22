@@ -13,6 +13,7 @@ PACKAGE_STATIC_DIR = os.path.join(
 
 STATIC_DIR = PACKAGE_STATIC_DIR
 ASSETS_DIR = os.path.join(STATIC_DIR, "assets")
+FAVICON_FILENAME = "EM-icon.png"
 
 
 app = Flask(__name__, static_folder=None)
@@ -88,6 +89,21 @@ def serve_assets(path):
     return send_from_directory(ASSETS_DIR, path)
 
 
+@app.route("/favicon.ico")
+def serve_favicon():
+    """Serve the tab icon for browsers that request /favicon.ico directly.
+
+    Browsers ask for this path on their own, regardless of the <link rel="icon">
+    tag. Letting the single page app fallback answer it returns HTML with a 200,
+    which browsers cache as a broken icon for the whole origin.
+    """
+    return send_from_directory(
+        ASSETS_DIR,
+        FAVICON_FILENAME,
+        mimetype="image/png",
+    )
+
+
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def serve_dashboard(path):
@@ -96,6 +112,14 @@ def serve_dashboard(path):
 
         if os.path.isfile(candidate):
             return send_from_directory(STATIC_DIR, path)
+
+        if os.path.splitext(path)[1]:
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": f"File /{path} not found",
+                }
+            ), 404
 
     return send_from_directory(STATIC_DIR, "index.html")
 
