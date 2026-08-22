@@ -5,7 +5,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
 
@@ -61,89 +60,152 @@ function ComparisonChart({ run1, run2 }) {
       <p className="chart-subtitle">
         Actual recorded values; metrics with
         different units are shown as separate
-        categories.
+        categories, each scaled to its own range
+        so no single metric visually overwhelms
+        the others.
       </p>
 
-      <ResponsiveContainer
-        width="100%"
-        height={300}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          marginBottom: 8,
+          fontSize: 12,
+          color: 'var(--text-secondary)',
+        }}
       >
-        <BarChart
-          data={data}
-          margin={{
-            top: 8,
-            right: 12,
-            left: 4,
-            bottom: 8,
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
           }}
         >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="var(--border-color)"
-            vertical={false}
-          />
-
-          <XAxis
-            dataKey="metric"
-            stroke="var(--text-muted)"
-            tick={{
-              fontSize: 11,
-              fill: 'var(--text-muted)'
-            }}
-            tickLine={false}
-            axisLine={false}
-          />
-
-          <YAxis
-            stroke="var(--text-muted)"
-            tick={{
-              fontSize: 11,
-              fill: 'var(--text-muted)'
-            }}
-            tickLine={false}
-            axisLine={false}
-          />
-
-          <Tooltip
-            contentStyle={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border-color)',
-              borderRadius: 10,
-              fontSize: 12,
-              color: 'var(--text-primary)',
-              boxShadow: 'var(--shadow-hover)'
-            }}
-            labelStyle={{
-              color: 'var(--text-primary)',
-              fontWeight: 600,
-              marginBottom: 4
-            }}
-            itemStyle={{
-              color: 'var(--text-secondary)'
-            }}
-            cursor={{
-              fill: 'var(--accent-light)',
-              fillOpacity: 0.12
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 3,
+              background: 'var(--accent)',
+              display: 'inline-block',
             }}
           />
+          {run1.run_id}
+        </span>
 
-          <Legend />
-
-          <Bar
-            dataKey="run1"
-            name={run1.run_id}
-            fill="var(--accent)"
-            radius={[6, 6, 0, 0]}
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 3,
+              background: 'var(--comparison-secondary)',
+              display: 'inline-block',
+            }}
           />
+          {run2.run_id}
+        </span>
+      </div>
 
-          <Bar
-            dataKey="run2"
-            name={run2.run_id}
-            fill="var(--comparison-secondary)"
-            radius={[6, 6, 0, 0]}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns:
+            'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 16,
+        }}
+      >
+        {data.map((entry) => (
+          <div key={entry.metric}>
+            <ResponsiveContainer
+              width="100%"
+              height={180}
+            >
+              <BarChart
+                data={[entry]}
+                margin={{
+                  top: 8,
+                  right: 8,
+                  left: 4,
+                  bottom: 8,
+                }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--border-color)"
+                  vertical={false}
+                />
+
+                <XAxis
+                  dataKey="metric"
+                  stroke="var(--text-muted)"
+                  tick={{
+                    fontSize: 11,
+                    fill: 'var(--text-muted)'
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+
+                <YAxis
+                  stroke="var(--text-muted)"
+                  tick={{
+                    fontSize: 11,
+                    fill: 'var(--text-muted)'
+                  }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 10,
+                    fontSize: 12,
+                    color: 'var(--text-primary)',
+                    boxShadow: 'var(--shadow-hover)'
+                  }}
+                  labelStyle={{
+                    color: 'var(--text-primary)',
+                    fontWeight: 600,
+                    marginBottom: 4
+                  }}
+                  itemStyle={{
+                    color: 'var(--text-secondary)'
+                  }}
+                  cursor={{
+                    fill: 'var(--accent-light)',
+                    fillOpacity: 0.12
+                  }}
+                />
+
+                <Bar
+                  dataKey="run1"
+                  name={run1.run_id}
+                  fill="var(--accent)"
+                  radius={[6, 6, 0, 0]}
+                />
+
+                <Bar
+                  dataKey="run2"
+                  name={run2.run_id}
+                  fill="var(--comparison-secondary)"
+                  radius={[6, 6, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
