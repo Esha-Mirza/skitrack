@@ -19,7 +19,7 @@
 
 ### From PyPI
 
-Once the package is published, the standard installation is:
+The standard installation is:
 
 ```bash
 python -m pip install skitrack
@@ -67,6 +67,7 @@ sqlalchemy>=2.0.0
 click>=8.0.0
 joblib>=1.3.0
 tabulate>=0.9.0
+python-dotenv>=1.0.0
 flask>=2.0.0
 flask-cors>=4.0.0
 ```

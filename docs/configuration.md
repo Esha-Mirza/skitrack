@@ -38,7 +38,6 @@ None. `skitrack` does not integrate with any external API or service, so there a
 There is no separate database server to configure — SQLite is file-based and created automatically. To use a custom location (e.g. to keep separate databases per project, or to store data on a different drive):
 
 ```bash
-# .env
 EXPERIMENT_TRACKER_DATA_DIR=/path/to/your/preferred/folder
 ```
 
