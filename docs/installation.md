@@ -15,60 +15,85 @@
 - macOS
 - Linux
 
+## Installation
+
+### From PyPI
+
+Once the package is published, the standard installation is:
+
+```bash
+python -m pip install skitrack
+```
+
+This installs the `skitrack` package and registers the `tracker` CLI command. The published package includes the compiled dashboard assets, so Node.js and npm are **not required** for normal use.
+
+### From Source
+
+```bash
+git clone https://github.com/Esha-Mirza/skitrack.git
+cd skitrack
+
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+```bash
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+Then install the package:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+This installs the `experiment_tracker` Python package and registers the `tracker` CLI command.
+
 ## Dependencies
 
-Installed automatically via `pip`:
+The runtime dependencies are installed automatically by the package:
 
-```
+```text
 pandas>=2.0.0
 numpy>=1.24.0
 scikit-learn>=1.3.0
 sqlalchemy>=2.0.0
 click>=8.0.0
 joblib>=1.3.0
-python-dotenv>=1.0.0
 tabulate>=0.9.0
 flask>=2.0.0
 flask-cors>=4.0.0
 ```
 
-For development (testing), additionally:
-
-```
-pytest>=7.0.0
-pytest-cov>=4.0.0
-flask
-```
-
-## Installation Commands
-
-### Standard install
+For development and testing, install:
 
 ```bash
-git clone https://github.com/Esha-Mirza/Local-First-Experiment-Tracker-for-Scikit-Learn.git
-cd Local-First-Experiment-Tracker-for-Scikit-Learn
-pip install -e .
-```
-
-This installs the `experiment_tracker` package and registers the `tracker` CLI command.
-
-### Development install
-
-```bash
-pip install -r requirements-dev.txt
-pip install -e .
+python -m pip install -r requirements-dev.txt
 ```
 
 ## Virtual Environment (recommended)
+
+A virtual environment is recommended for source/development installations:
 
 ```bash
 python -m venv venv
 
 # Activate it:
-source venv/bin/activate       # macOS / Linux
-venv\Scripts\activate          # Windows
+venv\Scripts\activate       # Windows
+source venv/bin/activate     # macOS / Linux
+```
 
-pip install -e .
+Then:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e .
 ```
 
 ## Database Setup
@@ -81,13 +106,21 @@ None required. `skitrack` does not call any external API or service — everythi
 
 ## Environment Variables
 
-Optional only. Copy `.env.example` to `.env` if you want to customize the data directory:
+No environment variables are required.
+
+To customize the local database location, set `EXPERIMENT_TRACKER_DATA_DIR` before running `tracker`:
 
 ```bash
-cp .env.example .env
+# macOS / Linux
+export EXPERIMENT_TRACKER_DATA_DIR=/path/to/your/data
+
+# Windows PowerShell
+$env:EXPERIMENT_TRACKER_DATA_DIR="C:\path\to\your\data"
 ```
 
 See [configuration.md](configuration.md) for details.
+
+> Note: `.env.example` is provided as a template, but the package does not automatically load `.env` files. If you use the template, export/set `EXPERIMENT_TRACKER_DATA_DIR` in your environment before running `tracker`.
 
 ## OS-Specific Notes
 
@@ -105,7 +138,7 @@ tracker stats
 
 If installed correctly, you should see either experiment statistics (if you have prior runs) or:
 
-```
+```text
 No experiments to analyze
 ```
 
@@ -115,6 +148,25 @@ You can also start the dashboard to confirm the full stack works:
 tracker dashboard
 ```
 
-![tracker dashboard starting](/assets/DASHBOARD_cmd.png)
+![tracker dashboard starting](assets/DASHBOARD_cmd.png)
 
 This should open `http://127.0.0.1:5000` in your browser automatically.
+
+## Dashboard Frontend Development
+
+This section applies only if you are modifying the React dashboard source under `dashboard/`.
+
+```bash
+cd dashboard
+npm install
+npm run dev
+```
+
+For a production/package build:
+
+```bash
+cd dashboard
+npm run build
+```
+
+The resulting compiled assets are consumed by the Python package build; end users installing the published package do not need to run the frontend build themselves.

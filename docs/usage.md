@@ -13,7 +13,7 @@ To launch the dashboard:
 tracker dashboard
 ```
 
-![tracker dashboard launching](/assets/DASHBOARD_cmd.png)
+![tracker dashboard launching](assets/DASHBOARD_cmd.png)
 
 ## Basic Workflow
 
@@ -69,7 +69,7 @@ Then browse the result:
 tracker show <run_id>
 ```
 
-![Run detail view](/assets/SHOW_ID.png)
+![Run detail view](assets/SHOW_ID.png)
 
 ## Commands
 
@@ -92,7 +92,7 @@ tracker list --limit 20 --verbose
 - `--limit`: number of experiments to show (default: 10)
 - `--verbose`: show detailed info (hyperparameters, dataset info) for the top 3 results
 
-![tracker list --verbose output](/assets/LIST_1.png)
+![tracker list --verbose output](assets/LIST_1.png)
 
 ### `tracker show`
 
@@ -116,7 +116,7 @@ Both prompt for confirmation before deleting anything.
 ```bash
 tracker stats
 ```
-![tracker stats output](/assets/STATS.png)
+![tracker stats output](assets/STATS.png)
 
 Prints aggregate statistics: total experiments, models used, average/fastest/slowest training time, and a breakdown by dataset (via dataset hash).
 

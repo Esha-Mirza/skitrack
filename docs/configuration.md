@@ -42,7 +42,7 @@ There is no separate database server to configure — SQLite is file-based and c
 EXPERIMENT_TRACKER_DATA_DIR=/path/to/your/preferred/folder
 ```
 
-Never commit a real `.env` file — use `.env.example` as the template and keep `.env` in `.gitignore` (already configured in this repo).
+The package does not automatically load `.env` files. If you use `.env.example` as a template, export/set `EXPERIMENT_TRACKER_DATA_DIR` in your environment before running `tracker`. Never commit a real `.env` file — keep it in `.gitignore`.
 
 ## Model Configuration
 

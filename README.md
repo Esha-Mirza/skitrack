@@ -1,4 +1,10 @@
-# skitrack — Local-First Experiment Tracker for Scikit-Learn
+<div align="center">
+
+<img src="dashboard/public/assets/favicon-512.png" alt="SkiTrack logo" width="96">
+
+# SkiTrack
+
+### Local-First Experiment Tracking for Scikit-Learn
 
 Track, compare, and browse your scikit-learn experiments with a single decorator — no external servers, no accounts, no cloud dashboard. Everything is stored locally on your machine.
 
@@ -6,6 +12,22 @@ Track, compare, and browse your scikit-learn experiments with a single decorator
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![Version](https://img.shields.io/badge/version-0.1.0-orange.svg)](CHANGELOG.md)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](#testing)
+
+</div>
+
+---
+
+## Demo
+
+<div align="center">
+
+<img src="docs/assets/DASHBOARD.png" alt="SkiTrack dashboard" width="900">
+
+</div>
+
+### Video Demo
+
+https://github.com/user-attachments/assets/74f2aa73-bcf9-49ea-b9ae-a0a0694e7d69
 
 ---
 
@@ -25,18 +47,6 @@ When you're iterating on scikit-learn models, it's easy to lose track of what yo
 - **Built-in dashboard** — a local web UI (`tracker dashboard`) to browse and compare runs visually.
 - **Dataset fingerprinting** — automatically hashes your dataset so you can tell which runs used the same data.
 - **Cross-platform** — stores data in the correct OS-appropriate app-data folder on Windows, macOS, and Linux.
-
-## Demo
-
-### Live Demo
-This is a local-first tool — there is no hosted live demo. Run `tracker dashboard` after installing to see it on your own machine.
-
-### Screenshots
-![Dashboard main view](docs/assets/DASHBOARD.png)
-
-### GIF/Video
-<video src="https://github.com/user-attachments/assets/74f2aa73-bcf9-49ea-b9ae-a0a0694e7d69" controls width="800"></video>
-
 
 ## Tech Stack
 
@@ -69,7 +79,7 @@ This is a local-first tool — there is no hosted live demo. Run `tracker dashbo
                    ↓
         ┌──────────────────────┐
         │  Flask API (api.py)  │
-        └──────────┬───────────┘
+        └──────────┬─────────────┘
                    ↓
         ┌──────────────────────┐
         │ React dashboard (UI) │
@@ -81,7 +91,7 @@ See [docs/architecture.md](docs/architecture.md) for the full breakdown.
 ## Project Structure
 
 ```
-Local-First-Experiment-Tracker-for-Scikit-Learn/
+skitrack/
 ├── experiment_tracker/     # Core package: decorator, storage, CLI, API
 ├── dashboard/              # React/Vite dashboard frontend
 ├── tests/                  # Test suite
@@ -100,20 +110,55 @@ Local-First-Experiment-Tracker-for-Scikit-Learn/
 
 ## Installation
 
+### From PyPI
+
+Once published, install SkiTrack directly with:
+
 ```bash
-git clone https://github.com/Esha-Mirza/Local-First-Experiment-Tracker-for-Scikit-Learn.git
-cd Local-First-Experiment-Tracker-for-Scikit-Learn
-pip install -e .
+pip install skitrack
 ```
 
-See [docs/installation.md](docs/installation.md) for full details, including dev setup.
+This installs the `skitrack` package and registers the `tracker` CLI command. The published package includes the built dashboard assets, so Node.js and npm are **not required** for normal use.
+
+### From Source
+
+```bash
+git clone https://github.com/Esha-Mirza/skitrack.git
+cd skitrack
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+```bash
+# Windows
+venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+Then install the package:
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+See [docs/installation.md](docs/installation.md) for full details, including development setup.
 
 ## Environment-Variable Setup
 
-`skitrack` works out of the box with no configuration. Optionally, copy `.env.example` to `.env` to customize where data is stored:
+`skitrack` works out of the box with no configuration. The optional `EXPERIMENT_TRACKER_DATA_DIR` environment variable can be used to customize where the local SQLite database is stored.
+
+For example:
 
 ```bash
-cp .env.example .env
+# macOS / Linux
+export EXPERIMENT_TRACKER_DATA_DIR=/path/to/your/data
+
+# Windows PowerShell
+$env:EXPERIMENT_TRACKER_DATA_DIR="C:\path\to\your\data"
 ```
 
 See [docs/configuration.md](docs/configuration.md) for all available settings.
