@@ -112,7 +112,7 @@ skitrack/
 
 ### From PyPI
 
-Once published, install SkiTrack directly with:
+Install SkiTrack directly with:
 
 ```bash
 pip install skitrack
