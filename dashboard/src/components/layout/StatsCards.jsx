@@ -82,7 +82,7 @@ function StatsCards({ runs }) {
         ? `${bestAccuracyInfo.value}%`
         : 'N/A',
       icon: Award,
-      color: '#ff3b47',
+      color: '#f77780',
     },
   ];
 

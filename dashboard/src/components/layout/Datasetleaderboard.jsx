@@ -3,7 +3,7 @@ import { Trophy, Medal, Award, Database, Eye, ListChecks, Target } from 'lucide-
 import { buildDatasetLeaderboard } from '../../utils/metrics';
 
 const RANK_ICONS = [Trophy, Medal, Award];
-const RANK_COLORS = ['#ffc107', '#c0c0c0', '#cd7f32'];
+const RANK_COLORS = ['#b12020', '#c4c2c2', '#cd7f32'];
 
 function DatasetLeaderboard({ runs, onViewRun }) {
   const [selectedIndex, setSelectedIndex] = useState(0);

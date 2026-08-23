@@ -159,10 +159,7 @@ def compute_default_metrics(model: Any, X_test, y_test) -> Dict[str, float]:
 
 
 def _extract_dataset(result, X_test, y_test):
-    """
-    Preserve backwards compatibility with the optional explicit dataset
-    payload, but the normal user API does not require it.
-    """
+
     if isinstance(result, tuple) and len(result) >= 6:
         dataset_payload = result[5]
 
@@ -173,11 +170,7 @@ def _extract_dataset(result, X_test, y_test):
 
 
 def _looks_like_dataset(value: Any) -> bool:
-    """
-    Determine whether a value is a plausible feature matrix/vector.
-    This deliberately avoids depending on scikit-learn so datasets from
-    pandas, NumPy, or other libraries can be tracked.
-    """
+
     if value is None:
         return False
 
@@ -204,22 +197,7 @@ def _looks_like_target(value: Any) -> bool:
 
 
 def _capture_function_locals(func: Callable, call):
-    """
-    Execute the decorated function while observing its return event.
 
-    This allows the tracker to inspect the function's local variables
-    without requiring the user to explicitly return the full dataset.
-
-    Typical user code:
-
-        X, y = dataset
-        X_train, X_test, y_train, y_test = train_test_split(...)
-        ...
-        return model, X_test, y_test
-
-    At the function's return event, X and y still contain the original
-    full dataset, while X_test and y_test contain only the evaluation split.
-    """
     captured = {}
 
     target_code = func.__code__
@@ -248,28 +226,15 @@ def _capture_function_locals(func: Callable, call):
 
 
 def _extract_dataset_from_locals(local_vars, X_test, y_test):
-    """
-    Automatically locate the full dataset from the experiment's local
-    variables.
 
-    Priority:
-      1. X / y — the conventional and recommended pattern.
-      2. Common full-dataset variable names.
-      3. A dataset-like object exposing data/target.
-    """
-
-    # ---------------------------------------------------------
-    # 1. Conventional X / y variables
-    # ---------------------------------------------------------
     X = local_vars.get("X")
     y = local_vars.get("y")
 
     if _looks_like_dataset(X) and _looks_like_target(y):
         return X, y
 
-    # ---------------------------------------------------------
-    # 2. Common feature/target naming conventions
-    # ---------------------------------------------------------
+
+
     feature_names = (
         "features",
         "data",
@@ -299,9 +264,9 @@ def _extract_dataset_from_locals(local_vars, X_test, y_test):
             if _looks_like_target(target_value):
                 return feature_value, target_value
 
-    # ---------------------------------------------------------
-    # 3. Dataset objects such as sklearn-style objects
-    # ---------------------------------------------------------
+
+
+
     for value in local_vars.values():
         if value is None:
             continue
@@ -316,13 +281,7 @@ def _extract_dataset_from_locals(local_vars, X_test, y_test):
 
 
 def _infer_dataset_name(dataset_hash: str, storage: Storage) -> str:
-    """
-    Assign a stable human-readable Dataset N label based on the dataset
-    hash.
 
-    The hash remains the true dataset identity. Dataset N is only the
-    user-facing label.
-    """
     if not dataset_hash:
         return None
 
@@ -415,26 +374,15 @@ def track_run(func: Callable) -> Callable:
             else None
         )
 
-        # -----------------------------------------------------
-        # Dataset detection
-        # -----------------------------------------------------
 
-        # Preserve support for an explicitly supplied dataset payload.
         dataset_X, dataset_y = _extract_dataset(
             result,
             X_test,
             y_test,
         )
 
-        # Automatically inspect function locals only when the
-        # experiment returns evaluation data.
-        #
-        # A bare:
-        #
-        #     return model
-        #
-        # intentionally remains dataset-untracked for backwards
-        # compatibility.
+
+
         has_evaluation_data = (
             isinstance(result, tuple)
             and len(result) >= 3
@@ -460,9 +408,9 @@ def track_run(func: Callable) -> Callable:
             dataset_hash = None
             dataset_shape = None
 
-        # -----------------------------------------------------
-        # Save run
-        # -----------------------------------------------------
+
+
+
 
         storage = Storage()
 

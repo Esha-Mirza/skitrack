@@ -179,7 +179,7 @@ class Storage:
         self.Session = sessionmaker(bind=self.engine)
 
     def get_or_create_dataset_name(self, dataset_hash: str) -> str:
-        """Return a stable human-readable label for a dataset hash."""
+  
         session = self.Session()
         try:
             existing = (

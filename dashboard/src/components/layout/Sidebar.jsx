@@ -6,7 +6,6 @@ import {
   FileDown,
   HelpCircle,
   Settings,
-  Activity
 } from 'lucide-react';
 
 const menuItems = [
@@ -23,7 +22,7 @@ function Sidebar({ currentView, onViewChange }) {
     <aside className="sidebar">
       <div className="sidebar-header">
         <div className="logo">
-          <Activity size={28} className="logo-icon" />
+            <img src="/assets/favicon-512.png" alt="SkiTrack" className="logo-icon" width={28} height={28}/>
           <span className="logo-text">SkiTrack</span>
         </div>
       </div>

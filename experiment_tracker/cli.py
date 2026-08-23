@@ -9,11 +9,10 @@ storage = Storage()
 def cli():
     pass
 
-
-@cli.command()
+@cli.command(name="list")
 @click.option('--limit', default=10, help='Number of experiments to show')
 @click.option('--verbose', is_flag=True, help='Show more details')
-def list(limit, verbose):
+def list_experiments(limit, verbose):
     runs = storage.get_all_runs()
 
     if not runs:
