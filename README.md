@@ -79,7 +79,7 @@ When you're iterating on scikit-learn models, it's easy to lose track of what yo
                    ↓
         ┌──────────────────────┐
         │  Flask API (api.py)  │
-        └──────────┬─────────────┘
+        └──────────┬───────────┘
                    ↓
         ┌──────────────────────┐
         │ React dashboard (UI) │
