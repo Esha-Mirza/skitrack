@@ -115,6 +115,6 @@ You can also start the dashboard to confirm the full stack works:
 tracker dashboard
 ```
 
-![tracker dashboard starting](assets/DASHBOARD_cmd.png)
+![tracker dashboard starting](/assets/DASHBOARD_cmd.png)
 
 This should open `http://127.0.0.1:5000` in your browser automatically.
