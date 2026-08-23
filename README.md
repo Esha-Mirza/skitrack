@@ -35,7 +35,8 @@ This is a local-first tool — there is no hosted live demo. Run `tracker dashbo
 ![Dashboard main view](docs/assets/DASHBOARD.png)
 
 ### GIF/Video
-![Demo](docs/assets/dashboard_vid.mp4)
+![Demo] <video src="https://github.com/user-attachments/assets/74f2aa73-bcf9-49ea-b9ae-a0a0694e7d69" controls width="800"></video>
+
 
 ## Tech Stack
 
