@@ -35,7 +35,7 @@ This is a local-first tool — there is no hosted live demo. Run `tracker dashbo
 ![Dashboard main view](docs/assets/DASHBOARD.png)
 
 ### GIF/Video
-![Demo] <video src="https://github.com/user-attachments/assets/74f2aa73-bcf9-49ea-b9ae-a0a0694e7d69" controls width="800"></video>
+<video src="https://github.com/user-attachments/assets/74f2aa73-bcf9-49ea-b9ae-a0a0694e7d69" controls width="800"></video>
 
 
 ## Tech Stack
@@ -52,27 +52,27 @@ This is a local-first tool — there is no hosted live demo. Run `tracker dashbo
 ## System Architecture Overview
 
 ```
-        ┌──────────────────────┐
+        ┌───────────────────────┐
         │  Your training code   │
         │   (@track_run)        │
         └──────────┬────────────┘
                    ↓
-        ┌──────────────────────┐
-        │  experiment_tracker    │
-        │  (decorator + storage) │
+        ┌───────────────────────┐
+        │  experiment_tracker   │
+        │ (decorator + storage) │
+        └──────────┬────────────┘
+                   ↓
+        ┌───────────────────────┐
+        │   SQLite database     │
+        │(local app-data folder)│
         └──────────┬────────────┘
                    ↓
         ┌──────────────────────┐
-        │   SQLite database      │
-        │ (local app-data folder)│
-        └──────────┬────────────┘
+        │  Flask API (api.py)  │
+        └──────────┬───────────┘
                    ↓
         ┌──────────────────────┐
-        │  Flask API (api.py)    │
-        └──────────┬────────────┘
-                   ↓
-        ┌──────────────────────┐
-        │  React dashboard (UI)  │
+        │ React dashboard (UI) │
         └──────────────────────┘
 ```
 
