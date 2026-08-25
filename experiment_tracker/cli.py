@@ -1,5 +1,6 @@
 import click
 from tabulate import tabulate
+from .models import format_metric_value
 from .storage import Storage
 
 storage = Storage()
@@ -130,7 +131,7 @@ def show(run_id):
 
     if run['metrics']:
         for key, value in run['metrics'].items():
-            click.echo(f"   - {key}: {value:.4f}")
+            click.echo(f"   - {key}: {format_metric_value(value)}")
     else:
         click.echo("   (No metrics tracked yet)")
 

@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import wraps
 from typing import Any, Callable, Dict
 
-from .models import Run
+from .models import Run, format_metric_value
 from .storage import Storage
 
 
@@ -205,6 +205,11 @@ def _capture_function_locals(func: Callable, call):
 
     def global_trace(frame, event, arg):
         if event == "call" and frame.f_code is target_code:
+            # Only the return event is needed to read the locals. Leaving
+            # line tracing on runs the tracer once per bytecode line of the
+            # user's training code, which slows it down and inflates the
+            # training_time this decorator exists to record.
+            frame.f_trace_lines = False
             return local_trace
 
         return None
@@ -463,7 +468,7 @@ def track_run(func: Callable) -> Callable:
             print(
                 "Metrics: "
                 + ", ".join(
-                    f"{key}={value:.4f}"
+                    f"{key}={format_metric_value(value)}"
                     for key, value in run.metrics.items()
                 )
             )

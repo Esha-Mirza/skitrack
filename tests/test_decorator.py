@@ -275,3 +275,20 @@ def test_full_dataset_payload_controls_dataset_hash_and_shape(tracked_storage):
     run = tracked_storage.get_all_runs()[0]
     assert run["dataset_shape"] == (150, 4)
     assert len(run["dataset_hash"]) == 64
+
+def test_non_numeric_metric_does_not_lose_the_run(tracked_storage):
+    @track_run
+    def train():
+        iris = load_iris()
+        X_train, X_test, y_train, y_test = train_test_split(
+            iris.data, iris.target, test_size=0.2, random_state=42
+        )
+        model = RandomForestClassifier(n_estimators=5, random_state=42)
+        model.fit(X_train, y_train)
+        return model, X_test, y_test, {"accuracy": 0.9, "note": "baseline"}
+
+    train()
+    runs = tracked_storage.get_all_runs()
+    assert len(runs) == 1
+    assert runs[0]["metrics"]["note"] == "baseline"
+    assert runs[0]["metrics"]["accuracy"] == 0.9

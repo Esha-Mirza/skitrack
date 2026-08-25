@@ -93,3 +93,27 @@ def test_dashboard_uses_package_static_directory():
     assert os.path.basename(api_module.STATIC_DIR) == "dist" or os.path.basename(api_module.STATIC_DIR) == "static"
     if os.path.basename(api_module.STATIC_DIR) == "static":
         assert os.path.isfile(os.path.join(api_module.STATIC_DIR, "index.html"))
+
+
+def test_missing_file_returns_404_instead_of_index(client):
+    response = client.get("/apple-touch-icon.png")
+    assert response.status_code == 404
+    assert b"<div id=\"root\">" not in response.data
+
+
+def test_favicon_request_is_not_answered_with_html(client):
+    response = client.get("/favicon.ico")
+    assert response.status_code == 404
+    assert response.mimetype != "text/html"
+
+
+def test_extensionless_path_still_falls_back_to_index(client):
+    response = client.get("/some/dashboard/view")
+    assert response.status_code == 200
+    assert b"<div id=\"root\">" in response.data
+
+
+def test_existing_static_file_is_still_served(client):
+    response = client.get("/index.html")
+    assert response.status_code == 200
+    assert b"<div id=\"root\">" in response.data
