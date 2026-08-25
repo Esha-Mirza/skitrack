@@ -9,13 +9,29 @@ import json
 Base = declarative_base()
 
 
+def format_metric_value(value: Any) -> str:
+    """Render a metric for display without assuming it is a float.
+
+    Storage accepts any JSON-safe metric value, so a run can legitimately
+    carry a string or a bool. Formatting those with ``:.4f`` raises, which
+    used to abort tracking after the training had already finished.
+    """
+    if isinstance(value, bool):
+        return str(value)
+
+    if isinstance(value, (int, float)):
+        return f"{value:.4f}"
+
+    return str(value)
+
+
 @dataclass
 class Metric:
     name: str
     value: float
 
     def __repr__(self):
-        return f"{self.name}: {self.value:.4f}"
+        return f"{self.name}: {format_metric_value(self.value)}"
 
 
 @dataclass

@@ -49,3 +49,13 @@ def test_dataset_hash_column_is_64_characters():
     Base.metadata.create_all(engine)
     column = next(column for column in inspect(engine).get_columns("runs") if column["name"] == "dataset_hash")
     assert "VARCHAR(64)" in str(column["type"]).upper()
+
+
+def test_format_metric_value_handles_non_floats():
+    from experiment_tracker.models import format_metric_value
+
+    assert format_metric_value(0.9) == "0.9000"
+    assert format_metric_value(3) == "3.0000"
+    assert format_metric_value("baseline") == "baseline"
+    assert format_metric_value(True) == "True"
+    assert format_metric_value(None) == "None"

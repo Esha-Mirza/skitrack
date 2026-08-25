@@ -31,6 +31,7 @@ None. All endpoints are open to any client that can reach the local port.
       "training_time": 0.42,
       "dataset_shape": [120, 4],
       "dataset_hash": "9f8e7d6c...",
+      "dataset_name": "Dataset 1",
       "params": { "n_estimators": 100, "max_depth": 5 },
       "metrics": { "accuracy": 0.9667 }
     }
@@ -65,6 +66,7 @@ None. All endpoints are open to any client that can reach the local port.
     "training_time": 0.42,
     "dataset_shape": [120, 4],
     "dataset_hash": "9f8e7d6c...",
+    "dataset_name": "Dataset 1",
     "params": { "n_estimators": 100, "max_depth": 5 },
     "metrics": { "accuracy": 0.9667 }
   }
@@ -109,6 +111,8 @@ None. All endpoints are open to any client that can reach the local port.
 
 **Purpose**: Serves the built React dashboard (`index.html` and its client-side routes). Not a data endpoint — this is what renders the dashboard UI in your browser.
 
+A path that looks like a file (anything with an extension, such as `/favicon.ico`) and is not present in the static directory returns `404 Not Found` with the standard error body, rather than falling back to `index.html`. Paths without an extension fall back to `index.html` so the dashboard can handle them.
+
 ---
 
 ## Errors
@@ -123,6 +127,7 @@ All error responses follow the same shape:
 
 ## Notes
 
+- `dataset_name` is `null` for runs where no dataset could be captured, for example when the decorated function returns only the model.
 - There is currently no pagination on `GET /api/runs` — all runs are returned in a single response.
 - There is no write API (creating/updating runs happens only through the `@track_run` decorator, not via HTTP).
 - For larger or public-facing APIs, OpenAPI/Swagger documentation would be preferable — for this project's current scope (a handful of local, read-only endpoints), manual documentation is sufficient.

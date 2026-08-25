@@ -75,7 +75,7 @@ def train():
     ...
     return model, X_test, y_test   # metrics computed automatically
 ```
-If only `model` is returned, hyperparameters and dataset info are still captured, but metrics won't be computed.
+If only `model` is returned, the model name, hyperparameters and training time are still captured, but metrics are not computed and no dataset shape, hash or name is recorded. `skitrack` needs `X_test` and `y_test` in the return value before it will look for the dataset the function trained on.
 
 ## Permission errors on Windows/macOS
 

@@ -101,3 +101,13 @@ def test_delete_specific_run(runner):
     result = cli_runner.invoke(cli_module.cli, ["delete", "to_delete"], input="y\n")
     assert result.exit_code == 0
     assert storage.get_run_count() == 0
+
+
+def test_show_renders_non_numeric_metric(runner):
+    cli_runner, storage = runner
+    _seed_run(storage, metrics={"accuracy": 0.9, "note": "baseline"})
+    result = cli_runner.invoke(cli_module.cli, ["show", "cli_run_1"])
+    assert result.exit_code == 0
+    assert result.exception is None
+    assert "baseline" in result.output
+    assert "0.9000" in result.output

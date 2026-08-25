@@ -97,6 +97,19 @@ def serve_dashboard(path):
         if os.path.isfile(candidate):
             return send_from_directory(STATIC_DIR, path)
 
+        if os.path.splitext(path)[1]:
+            # A request for a file that is not on disk, such as the
+            # /favicon.ico browsers ask for on their own. Answering it with
+            # index.html hands the client HTML under a 200, so a missing
+            # asset looks like a working one and browsers cache the result
+            # as a broken icon or script.
+            return jsonify(
+                {
+                    "status": "error",
+                    "message": f"File /{path} not found",
+                }
+            ), 404
+
     return send_from_directory(STATIC_DIR, "index.html")
 
 
